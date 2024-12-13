@@ -13,6 +13,7 @@ L’infrastructure BartInfo inclura les éléments suivants :
   - 10 utilisateurs organisés dans des Unités d’Organisation (3 UO).
   - 3 postes physiques (2 pour les clients et 1 pour l’administrateur).
 
+
 L'infrastructure sera mise en place sur des Vms Proxmox.
 
 ## Objectifs du projet
