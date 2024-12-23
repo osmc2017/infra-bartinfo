@@ -14,6 +14,7 @@ Les règles de pare-feu respecteront les principes suivants :
 - **VLAN 20** (Serveurs) peut uniquement accéder au VLAN 5 (DC).
 - **VLAN 40** (Utilisateurs) peut uniquement accéder au VLAN 20 (Serveurs) sur des services spécifiques.
 - Tous les VLANs peuvent accéder à Internet selon les règles configurées.
+- **VLAN 40 (Utilisateurs)** peut accéder au **VLAN 5 (DC)** uniquement pour les services critiques comme l'authentification Active Directory et DNS.
 
 ---
 
@@ -65,7 +66,7 @@ Les règles de pare-feu respecteront les principes suivants :
      - **Action** : Pass
      - **Protocol** : Any
      - **Source** : `VLAN10 net`
-     - **Destination** : `192.168.0.0/30`.
+     - **Destination** : `VLAN05 subnet`.
    - **Permettre la communication avec VLAN 20 (Serveurs)** :
      - **Action** : Pass
      - **Protocol** : Any
@@ -89,12 +90,12 @@ Les règles de pare-feu respecteront les principes suivants :
      - **Action** : Pass
      - **Protocol** : Any
      - **Source** : `VLAN20 net`
-     - **Destination** : `192.168.0.0/30`.
+     - **Destination** : `VLAN05 subnet`.
    - **Permettre l'accès à Internet** :
      - **Action** : Pass
      - **Protocol** : Any
      - **Source** : `VLAN20 net`
-     - **Destination** : Any (ou choisissez `WAN net` si disponible).
+     - **Destination** : Any 
    - **Bloquer tout autre trafic** :
      - **Action** : Block
      - **Source** : `VLAN20 net`
@@ -109,6 +110,18 @@ Les règles de pare-feu respecteront les principes suivants :
      - **Protocol** : TCP/UDP (ou spécifique, comme HTTP/HTTPS).
      - **Source** : `VLAN40 net`
      - **Destination** : `192.168.0.32/27`.
+   - **Permettre un accès limité au VLAN 5 (DC)** pour les services critiques :
+     - **Action** : Pass
+     - **Protocol** : TCP/UDP
+     - **Source** : `VLAN40 net`
+     - **Destination** : `VLAN05 subnet`
+     - **Ports** :
+       - **Kerberos** : 88 (TCP/UDP)
+       - **LDAP** : 389 (TCP/UDP)
+       - **LDAPS** : 636 (TCP)
+       - **DNS** : 53 (TCP/UDP)
+       - **NTP** : 123 (UDP)
+     - **Description** : "Accès limité des utilisateurs au DC".
    - **Permettre l'accès à Internet** :
      - **Action** : Pass
      - **Protocol** : Any
@@ -141,6 +154,7 @@ Pour vérifier que les règles fonctionnent comme prévu :
 
 1. Depuis un client dans **VLAN 40** (Utilisateurs) :
    - Vérifiez que vous pouvez accéder aux serveurs dans **VLAN 20** (selon les services autorisés).
+   - Vérifiez que vous pouvez accéder aux services critiques du **DC** (exemple : authentification, DNS).
    - Vérifiez que vous pouvez accéder à Internet.
 
 2. Depuis un client dans **VLAN 10** (Administrateurs) :
@@ -160,7 +174,8 @@ Pour vérifier que les règles fonctionnent comme prévu :
 | VLAN 10 (Admins) | VLAN 5, VLAN 20 | Oui           | Administration.               |
 | VLAN 20 (Serveurs) | VLAN 5 (DC)   | Oui           | Dépendance serveur/DC.        |
 | VLAN 40 (Users) | VLAN 20 (Serveurs) | Limité       | Services spécifiques (HTTP).  |
+| VLAN 40 (Users) | VLAN 5 (DC)      | Limité       | Services critiques (auth, DNS).|
 | Tous les VLANs | Internet         | Oui           | Accès configuré via NAT.      |
 
-Avec cette configuration, vous respectez l’architecture en tiers et limitez les accès non nécessaires entre les VLANs tout en permettant un accès sécurisé à Internet. Si vous avez besoin d’ajouter des règles spécifiques ou de tester davantage, faites-le-moi savoir !
+Avec cette configuration, vous respectez l’architecture en tiers et limitez les accès non nécessaires entre les VLANs tout en permettant un accès sécurisé à Internet et aux services essentiels du DC. Si vous avez besoin d’ajouter des règles spécifiques ou de tester davantage, faites-le-moi savoir !
 
