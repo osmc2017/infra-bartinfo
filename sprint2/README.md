@@ -9,5 +9,5 @@ Dans ce sprint on va:
 - mise en place 3 OU
 - Importer les 10 utilisateurs
 - définir les régles GPO
-- configurer dhcp pfsense
+- configurer dhcp pfsense ok (fait sprint 1)
 
