@@ -9,6 +9,8 @@ L’infrastructure BartInfo inclura les éléments suivants :
 - **Serveur Active Directory (AD)** : Comprenant un contrôleur de domaine (DC) pour la gestion centralisée des utilisateurs, des ordinateurs et des politiques.
 - **pfSense** : Pour la gestion du pare-feu et du routage.
 - **Serveur GLPI** : Outil de gestion des tickets et inventaire, intégré à Active Directory.
+- **Serveur de fichier** : Serveur windows qui permettra de stocker les dossiers partagés
+- **Serveur de sauvegarde** : Ce serveur sauvegardera les dossier partager et le serveur AD sur des disques en raid 1
 - **Clients** :
   - 10 utilisateurs organisés dans des Unités d’Organisation (3 UO).
   - 3 postes physiques (2 pour les clients et 1 pour l’administrateur).
