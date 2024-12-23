@@ -6,7 +6,7 @@ Bienvenue dans le projet **BartInfo**, une infrastructure réseau fictive conçu
 
 L’infrastructure BartInfo inclura les éléments suivants :
 
-- **Serveur Active Directory (AD)** : Comprenant un contrôleur de domaine (DC) pour la gestion centralisée des utilisateurs, des ordinateurs et des politiques.
+- **Serveur Active Directory (AD)** : Comprenant un contrôleur de domaine (DC) pour la gestion centralisée des utilisateurs, des ordinateurs et des politiques. Nom du DC: bartinfo.com
 - **pfSense** : Pour la gestion du pare-feu et du routage.
 - **Serveur GLPI** : Outil de gestion des tickets et inventaire, intégré à Active Directory.
 - **Serveur de fichier** : Serveur windows qui permettra de stocker les dossiers partagés
