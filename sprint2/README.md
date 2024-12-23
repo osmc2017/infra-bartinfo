@@ -2,12 +2,10 @@
 
 Dans ce sprint on va:
 
-- Installer et configurer le serveur AD:
 
-- installer l'AD
-- Mise en place du service DNS
-- mise en place 3 OU
-- Importer les 10 utilisateurs
-- définir les régles GPO
-- configurer dhcp pfsense ok (fait sprint 1)
+- schéma logique de notre infrastructure A faire
+- Installation de GLPI sur la VM
+- intégration à l'AD
+- installation serveur sauvegarde
+- Installation serveur de fichier
 
