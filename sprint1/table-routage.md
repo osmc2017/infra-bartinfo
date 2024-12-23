@@ -2,8 +2,8 @@
 
 ## Base technique
 
-**Adresse IP de réseau** : 192.168.0.0/
-**Adresse de passerelle** : A definir
+**Adresse IP de réseau** : 192.168.0.0/16
+**Adresse de passerelle** : 192.168.255.254
 **Adresse IP DNS** : A definir 
 
 ## Plan d'adressage
