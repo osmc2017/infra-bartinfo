@@ -56,7 +56,8 @@ foreach ($user in $data) {
 
     try {
         # Créer l'utilisateur dans Active Directory
-        New-ADUser -GivenName $firstName `
+        New-ADUser -Name "$firstName $lastName" `
+                   -GivenName $firstName `
                    -Surname $lastName `
                    -SamAccountName $samAccountName `
                    -UserPrincipalName "$samAccountName@demo.lan" `
