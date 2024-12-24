@@ -46,7 +46,7 @@ OU=Département,OU=Departements,DC=demo,DC=lan
 
 ### 4. Donner les droits au script avec: 
 
-`Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass`
+`Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass` ou `unrestricted`
 
 ### 5. Encodage du script: 
 
