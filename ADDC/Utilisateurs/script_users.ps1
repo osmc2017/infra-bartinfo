@@ -1,75 +1,56 @@
 # Script de création d'utilisateurs dans Active Directory
 
-# Importer le module Active Directory
-Import-Module ActiveDirectory
+# Importer les données
+$CSVFile = "C:\Users\Administrator\Desktop\Phargreen.csv"
+$CSVData = Import-CSV -Path $CSVFile -Delimiter ","
 
-# Chemin vers votre fichier CSV contenant les informations des utilisateurs
-$csvPath = "C:\Users\Administrator\Desktop\Phargreen.csv"
+# Boucle pour parcourir les lignes CSV
+Foreach($Utilisateur in $CSVData) {
+    # Création de variable pour remplir les champs lors de la création des utilisateurs
+    $UtilisateurPrenom = $Utilisateur.Prénom
+    $UtilisateurNom = $Utilisateur.Nom
+    $UtilisateurLogin = $UtilisateurNom.Replace(" ", ".").ToLower() + "." + ($UtilisateurPrenom).Substring(0,1).Replace(" ", ".").ToLower()
+    $UtilisateurEmail = "$UtilisateurLogin@demo.lan"
+    $UtilisateurMotDePasse = "Azerty1*"
+    $UtilisateurFonction = $Utilisateur.Fonction
+    $UtilisateurDepartement = $Utilisateur.Département
+    $UtilisateurService = $Utilisateur.Service
 
-# Vérifier si le fichier CSV existe
-if (-Not (Test-Path $csvPath)) {
-    Write-Error "Le fichier CSV n'existe pas à l'emplacement spécifié : $csvPath"
-    exit
-}
-
-# Importer les données du fichier CSV
-$data = Import-Csv -Path $csvPath
-
-# Mot de passe par défaut pour tous les utilisateurs
-$defaultPassword = ConvertTo-SecureString "Azerty1*" -AsPlainText -Force
-
-# Parcourir chaque ligne du fichier CSV pour créer les utilisateurs
-foreach ($user in $data) {
-    # Récupérer les informations utilisateur depuis le CSV
-    $firstName = $user.Prénom
-    $lastName = $user.Nom
-    $department = $user.Département
-    $service = $user.Service
-    $telephoneFixe = $user."Téléphone fixe"
-    $telephonePortable = $user."Téléphone portable"
-
-    # Construire le SamAccountName en remplaçant les espaces et traits d'union
-    $normalizedFirstName = $firstName -replace "[^a-zA-Z0-9]", ""
-    $normalizedLastName = $lastName -replace "[^a-zA-Z0-9]", ""
-    $samAccountName = "$($normalizedFirstName.Substring(0,1).ToLower())$($normalizedLastName.ToLower())"
-
-    # Assurer l'unicité du SamAccountName
-    $uniqueSamAccountName = $samAccountName
-    $counter = 1
-    while (Get-ADUser -Filter { SamAccountName -eq $uniqueSamAccountName } -ErrorAction SilentlyContinue) {
-        $uniqueSamAccountName = "$samAccountName$counter"
-        $counter++
-    }
-
-    # Construire le Distinguished Name (DN) pour placer l'utilisateur dans la bonne OU
-    if (-Not [string]::IsNullOrWhiteSpace($service) -and $service -ne "-") {
-        $ouPath = "OU=$service,OU=$department,OU=Departements,DC=demo,DC=lan"
+    # Construire le chemin de l'OU basé sur le département et le service
+    if (-Not [string]::IsNullOrWhiteSpace($UtilisateurService) -and $UtilisateurService -ne "-") {
+        $OUPath = "OU=$UtilisateurService,OU=$UtilisateurDepartement,OU=Departements,DC=demo,DC=lan"
     } else {
-        $ouPath = "OU=$department,OU=Departements,DC=demo,DC=lan"
+        $OUPath = "OU=$UtilisateurDepartement,OU=Departements,DC=demo,DC=lan"
     }
 
     # Vérifier si l'OU existe
-    if (-Not (Get-ADOrganizationalUnit -Filter { DistinguishedName -eq $ouPath } -ErrorAction SilentlyContinue)) {
-        Write-Warning "L'OU spécifiée '$ouPath' n'existe pas. L'utilisateur '$firstName $lastName' sera ignoré."
+    if (-Not (Get-ADOrganizationalUnit -Filter { DistinguishedName -eq $OUPath } -ErrorAction SilentlyContinue)) {
+        Write-Warning "L'OU spécifiée '$OUPath' n'existe pas. L'utilisateur '$UtilisateurNom $UtilisateurPrenom' sera ignoré."
         continue
     }
 
-    try {
-        # Créer l'utilisateur dans Active Directory
-        New-ADUser -Name "$firstName $lastName" `
-                   -GivenName $firstName `
-                   -Surname $lastName `
-                   -SamAccountName $uniqueSamAccountName `
-                   -UserPrincipalName "$uniqueSamAccountName@demo.lan" `
-                   -Path $ouPath `
-                   -OfficePhone $telephoneFixe `
-                   -MobilePhone $telephonePortable `
-                   -AccountPassword $defaultPassword `
-                   -Enabled $true `
-                   -ChangePasswordAtLogon $true
+    # Vérification si l'utilisateur a déjà été créé
+    if (Get-ADUser -Filter { SamAccountName -eq $UtilisateurLogin }) {
+        Write-Warning "L'identifiant $UtilisateurLogin existe déjà dans l'AD"
+    } else {
+        # Création de chaque utilisateur avec les variables
+        try {
+            New-ADUser -Name "$UtilisateurNom $UtilisateurPrenom" `
+                       -DisplayName "$UtilisateurNom $UtilisateurPrenom" `
+                       -GivenName "$UtilisateurPrenom" `
+                       -Surname $UtilisateurNom `
+                       -SamAccountName $UtilisateurLogin `
+                       -UserPrincipalName "$UtilisateurLogin@demo.lan" `
+                       -EmailAddress $UtilisateurEmail `
+                       -Title $UtilisateurFonction `
+                       -Path $OUPath `
+                       -AccountPassword (ConvertTo-SecureString $UtilisateurMotDePasse -AsPlainText -Force) `
+                       -ChangePasswordAtLogon $true `
+                       -Enabled $true
 
-        Write-Host "Utilisateur '$firstName $lastName' créé avec succès dans '$ouPath'."
-    } catch {
-        Write-Error "Erreur lors de la création de l'utilisateur '$firstName $lastName'. Détails : $_"
+            Write-Host "Utilisateur '$UtilisateurNom $UtilisateurPrenom' créé avec succès dans '$OUPath'."
+        } catch {
+            Write-Error "Erreur lors de la création de l'utilisateur '$UtilisateurNom $UtilisateurPrenom'. Détails : $_"
+        }
     }
 }
