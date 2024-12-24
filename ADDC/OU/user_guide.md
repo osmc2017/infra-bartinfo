@@ -53,6 +53,10 @@ $csvPath = "C:\Users\Administrator\Desktop\bartinfo.csv"
 ```
 Adaptez ce chemin selon l’emplacement réel de votre fichier.
 
+### 4. Donner les droits au script avec: 
+
+`Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass`
+
 ---
 
 ## Fonctionnement du script

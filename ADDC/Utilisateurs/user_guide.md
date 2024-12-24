@@ -44,6 +44,10 @@ OU=Service,OU=Département,OU=Departements,DC=demo,DC=lan
 OU=Département,OU=Departements,DC=demo,DC=lan
 ```
 
+### 4. Donner les droits au script avec: 
+
+`Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass`
+
 ---
 
 ## Description du script
