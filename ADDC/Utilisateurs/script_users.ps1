@@ -28,8 +28,18 @@ foreach ($user in $data) {
     $telephoneFixe = $user."Téléphone fixe"
     $telephonePortable = $user."Téléphone portable"
 
-    # Construire le SamAccountName
-    $samAccountName = "$($firstName.Substring(0,1).ToLower())$($lastName.ToLower())"
+    # Construire le SamAccountName unique
+    $normalizedFirstName = $firstName -replace "[^a-zA-Z0-9- ]", ""
+    $normalizedLastName = $lastName -replace "[^a-zA-Z0-9- ]", ""
+    $samAccountName = "$($normalizedFirstName.Substring(0,1).ToLower())$($normalizedLastName.ToLower())"
+
+    # Assurer l'unicité du SamAccountName
+    $uniqueSamAccountName = $samAccountName
+    $counter = 1
+    while (Get-ADUser -Filter { SamAccountName -eq $uniqueSamAccountName } -ErrorAction SilentlyContinue) {
+        $uniqueSamAccountName = "$samAccountName$counter"
+        $counter++
+    }
 
     # Construire le Distinguished Name (DN) pour placer l'utilisateur dans la bonne OU
     if (-Not [string]::IsNullOrWhiteSpace($service) -and $service -ne "-") {
@@ -44,19 +54,13 @@ foreach ($user in $data) {
         continue
     }
 
-    # Vérifier si l'utilisateur existe déjà
-    if (Get-ADUser -Filter { SamAccountName -eq $samAccountName } -ErrorAction SilentlyContinue) {
-        Write-Warning "L'utilisateur avec SamAccountName '$samAccountName' existe déjà."
-        continue
-    }
-
     try {
         # Créer l'utilisateur dans Active Directory
         New-ADUser -Name "$firstName $lastName" `
                    -GivenName $firstName `
                    -Surname $lastName `
-                   -SamAccountName $samAccountName `
-                   -UserPrincipalName "$samAccountName@demo.lan" `
+                   -SamAccountName $uniqueSamAccountName `
+                   -UserPrincipalName "$uniqueSamAccountName@demo.lan" `
                    -Path $ouPath `
                    -OfficePhone $telephoneFixe `
                    -MobilePhone $telephonePortable `
