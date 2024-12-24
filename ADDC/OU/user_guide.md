@@ -57,6 +57,10 @@ Adaptez ce chemin selon l’emplacement réel de votre fichier.
 
 `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass`
 
+### 5. Encodage du script: 
+
+AINSI
+
 ---
 
 ## Fonctionnement du script

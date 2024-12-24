@@ -48,6 +48,10 @@ OU=Département,OU=Departements,DC=demo,DC=lan
 
 `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass`
 
+### 5. Encodage du script: 
+
+AINSI
+
 ---
 
 ## Description du script
