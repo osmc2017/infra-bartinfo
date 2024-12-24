@@ -31,7 +31,7 @@ foreach ($user in $data) {
     # Construire le SamAccountName unique
     $normalizedFirstName = $firstName -replace "[^a-zA-Z0-9- ]", ""
     $normalizedLastName = $lastName -replace "[^a-zA-Z0-9- ]", ""
-    $samAccountName = "$($normalizedFirstName.Substring(0,1).ToLower())$($normalizedLastName.ToLower())"
+    $samAccountName = "$($normalizedFirstName.Substring(0,1).ToLower())$($normalizedLastName.ToLower().Replace(' ', '').Replace('-', ''))"
 
     # Assurer l'unicité du SamAccountName
     $uniqueSamAccountName = $samAccountName
