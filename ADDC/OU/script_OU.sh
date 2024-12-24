@@ -2,7 +2,7 @@
 Import-Module ActiveDirectory
 
 # Chemin vers votre fichier CSV contenant les départements et services
-$csvPath = "C:\Users\Administrator\Desktop\Pharmgreen.csv"
+$csvPath = "C:\Users\Administrator\Desktop\Phargreen.csv"
 
 # Vérifier si le fichier CSV existe
 if (-Not (Test-Path $csvPath)) {
@@ -58,10 +58,14 @@ function Remove-DeletionProtection {
     }
 }
 
+# Extraire les départements et services uniques
+$departments = $data | Select-Object -ExpandProperty Département -Unique
+$departmentServices = $data | Group-Object Département
+
 # Créer les OUs pour chaque département et leurs services
-foreach ($row in $data) {
-    $department = $row.Département
-    $service = $row.Service
+foreach ($group in $departmentServices) {
+    $department = $group.Name
+    $services = $group.Group | Select-Object -ExpandProperty Service -Unique
 
     # Vérifier que le nom du département n'est pas vide
     if ([string]::IsNullOrWhiteSpace($department)) {
@@ -78,14 +82,16 @@ foreach ($row in $data) {
     # Supprimer la protection contre la suppression accidentelle pour l'OU du département
     Remove-DeletionProtection -ouDN $departmentOUDN
 
-    # Si le service est renseigné, le créer sous l'OU du département
-    if (-Not [string]::IsNullOrWhiteSpace($service)) {
-        $serviceOUDN = "OU=$service,$departmentOUDN"
+    # Si des services sont renseignés, les créer sous l'OU du département
+    foreach ($service in $services) {
+        if (-Not [string]::IsNullOrWhiteSpace($service)) {
+            $serviceOUDN = "OU=$service,$departmentOUDN"
 
-        # Créer l'OU du service si elle n'existe pas
-        CreateOU -ouDN $serviceOUDN -ouName $service -parentPath $departmentOUDN
+            # Créer l'OU du service si elle n'existe pas
+            CreateOU -ouDN $serviceOUDN -ouName $service -parentPath $departmentOUDN
 
-        # Supprimer la protection contre la suppression accidentelle pour l'OU du service
-        Remove-DeletionProtection -ouDN $serviceOUDN
+            # Supprimer la protection contre la suppression accidentelle pour l'OU du service
+            Remove-DeletionProtection -ouDN $serviceOUDN
+        }
     }
 }
