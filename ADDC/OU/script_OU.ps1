@@ -2,7 +2,7 @@
 Import-Module ActiveDirectory
 
 # Chemin vers votre fichier CSV contenant les départements et services
-$csvPath = "C:\Users\Administrator\Desktop\Phargreen.csv"
+$csvPath = "C:\Users\Administrator\Desktop\bartinfo.csv"
 
 # Vérifier si le fichier CSV existe
 if (-Not (Test-Path $csvPath)) {
@@ -14,7 +14,7 @@ if (-Not (Test-Path $csvPath)) {
 $data = Import-Csv -Path $csvPath | Select-Object Département, Service
 
 # Spécifier l'OU parent pour les départements
-$departmentsParentOU = "OU=Departements,DC=demo,DC=lan"
+$departmentsParentOU = "OU=Departements,DC=bartinfo,DC=com"
 
 # Fonction pour vérifier et créer une OU si elle n'existe pas
 function CreateOU {
@@ -44,7 +44,7 @@ function CreateOU {
 }
 
 # Créer l'OU principale "Departements"
-CreateOU -ouName "Departements" -parentPath "DC=demo,DC=lan"
+CreateOU -ouName "Departements" -parentPath "DC=bartinfo,DC=com"
 
 # Grouper les données par département
 $departmentServices = $data | Group-Object Département

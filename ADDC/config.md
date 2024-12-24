@@ -1,4 +1,4 @@
-# Installation et configuration des roles AD
+# Configuration de l'AD
 
 ## Prérequis
 
@@ -15,4 +15,11 @@
 
 Pour l'installation et la configuration suivre ce tuto en cliquant [ici](mettre le lien)
 
-##  
+## Etape 1 : Création des OUs avec script
+
+Voir dossier OU
+
+## Etape 2 : Création des Utilisateurs avec script
+
+Voir dossier Utilisateurs
+

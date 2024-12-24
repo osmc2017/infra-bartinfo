@@ -1,7 +1,7 @@
 # Script de création d'utilisateurs dans Active Directory
 
 # Importer les données
-$CSVFile = "C:\Users\Administrator\Desktop\Phargreen.csv"
+$CSVFile = "C:\Users\Administrator\Desktop\bartinfo.csv"
 $CSVData = Import-CSV -Path $CSVFile -Delimiter ","
 
 # Boucle pour parcourir les lignes CSV
@@ -10,7 +10,7 @@ Foreach($Utilisateur in $CSVData) {
     $UtilisateurPrenom = $Utilisateur.Prénom
     $UtilisateurNom = $Utilisateur.Nom
     $UtilisateurLogin = $UtilisateurNom.Replace(" ", ".").ToLower() + "." + ($UtilisateurPrenom).Substring(0,1).Replace(" ", ".").ToLower()
-    $UtilisateurEmail = "$UtilisateurLogin@demo.lan"
+    $UtilisateurEmail = "$UtilisateurLogin@bartinfo.com"
     $UtilisateurMotDePasse = "Azerty1*"
     $UtilisateurFonction = $Utilisateur.Fonction
     $UtilisateurDepartement = $Utilisateur.Département
@@ -18,9 +18,9 @@ Foreach($Utilisateur in $CSVData) {
 
     # Construire le chemin de l'OU basé sur le département et le service
     if (-Not [string]::IsNullOrWhiteSpace($UtilisateurService) -and $UtilisateurService -ne "-") {
-        $OUPath = "OU=$UtilisateurService,OU=$UtilisateurDepartement,OU=Departements,DC=demo,DC=lan"
+        $OUPath = "OU=$UtilisateurService,OU=$UtilisateurDepartement,OU=Departements,DC=bartinfo,DC=com"
     } else {
-        $OUPath = "OU=$UtilisateurDepartement,OU=Departements,DC=demo,DC=lan"
+        $OUPath = "OU=$UtilisateurDepartement,OU=Departements,DC=bartinfo,DC=com"
     }
 
     # Vérifier si l'OU existe
@@ -40,7 +40,7 @@ Foreach($Utilisateur in $CSVData) {
                        -GivenName "$UtilisateurPrenom" `
                        -Surname $UtilisateurNom `
                        -SamAccountName $UtilisateurLogin `
-                       -UserPrincipalName "$UtilisateurLogin@demo.lan" `
+                       -UserPrincipalName "$UtilisateurLogin@bartinfo.com" `
                        -EmailAddress $UtilisateurEmail `
                        -Title $UtilisateurFonction `
                        -Path $OUPath `
