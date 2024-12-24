@@ -29,7 +29,7 @@ foreach ($user in $data) {
     $telephonePortable = $user."Téléphone portable"
 
     # Construire le SamAccountName
-    $samAccountName = "$($firstName.Substring(0,1).ToLower())$($lastName.ToLower())"
+    $samAccountName = "$($firstName.Substring(0,1).ToLower())$($lastName.ToLower().Replace(' ', '').Replace('-', ''))"
 
     # Construire le Distinguished Name (DN) pour placer l'utilisateur dans la bonne OU
     if (-Not [string]::IsNullOrWhiteSpace($service) -and $service -ne "-") {
