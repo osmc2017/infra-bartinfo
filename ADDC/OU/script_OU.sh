@@ -1,4 +1,4 @@
-# Importer le module Active Directory pour manipuler les objets dans l'AD
+# Importer le module Active Directory
 Import-Module ActiveDirectory
 
 # Chemin vers votre fichier CSV contenant les départements et services
@@ -10,87 +10,63 @@ if (-Not (Test-Path $csvPath)) {
     exit
 }
 
-# Importer les données du fichier CSV et se concentrer uniquement sur les colonnes nécessaires
+# Importer les données du fichier CSV en filtrant uniquement les colonnes nécessaires
 $data = Import-Csv -Path $csvPath | Select-Object Département, Service
 
 # Spécifier l'OU parent pour les départements
 $departmentsParentOU = "OU=Departements,DC=demo,DC=lan"
 
-# Fonction pour vérifier et créer une OU parent si elle n'existe pas
+# Fonction pour vérifier et créer une OU si elle n'existe pas
 function CreateOU {
     param (
-        [string]$ouDN,  # Chemin distingué de l'OU
         [string]$ouName,  # Nom de l'OU
         [string]$parentPath  # Chemin du conteneur parent
     )
 
+    # Construire le chemin distingué (DN) complet
+    $ouDN = "OU=$ouName,$parentPath"
+
     # Vérifier si l'OU existe déjà
     if (-Not (Get-ADOrganizationalUnit -Filter { DistinguishedName -eq $ouDN } -ErrorAction SilentlyContinue)) {
         try {
-            # Créer l'OU parent si elle n'existe pas
+            # Créer l'OU si elle n'existe pas
             New-ADOrganizationalUnit -Name $ouName -Path $parentPath -ErrorAction Stop
-            Write-Host "L'OU '$ouName' créée avec succès."
+            Write-Host "L'OU '$ouName' créée avec succès dans '$parentPath'."
         }
         catch {
             Write-Error "Erreur lors de la création de l'OU '$ouName'. Détails de l'erreur : $_"
         }
     } else {
-        Write-Host "L'OU '$ouName' existe déjà."
+        Write-Host "L'OU '$ouName' existe déjà dans '$parentPath'."
     }
+
+    return $ouDN
 }
 
-# Fonction pour désactiver la protection contre la suppression accidentelle sur une OU
-function Remove-DeletionProtection {
-    param ([string]$ouDN)  # Chemin distingué de l'OU
+# Créer l'OU principale "Departements"
+CreateOU -ouName "Departements" -parentPath "DC=demo,DC=lan"
 
-    # Vérifier si l'OU existe avant d'essayer de modifier ses propriétés
-    if (Get-ADOrganizationalUnit -Filter { DistinguishedName -eq $ouDN } -ErrorAction SilentlyContinue) {
-        try {
-            # Désactiver la protection contre la suppression accidentelle
-            Set-ADOrganizationalUnit -Identity $ouDN -ProtectedFromAccidentalDeletion $false
-            Write-Host "Protection contre la suppression accidentelle désactivée pour l'OU '$ouDN'."
-        }
-        catch {
-            Write-Warning "Impossible de supprimer la protection contre la suppression accidentelle pour l'OU '$ouDN'. Détails de l'erreur : $_"
-        }
-    } else {
-        Write-Warning "L'OU '$ouDN' n'existe pas, impossible de modifier ses propriétés."
-    }
-}
-
-# Extraire les départements et services uniques
+# Grouper les données par département
 $departmentServices = $data | Group-Object Département
 
-# Créer les OUs pour chaque département et leurs services
+# Parcourir chaque groupe de départements
 foreach ($group in $departmentServices) {
     $department = $group.Name
     $services = $group.Group | Select-Object -ExpandProperty Service -Unique
 
-    # Vérifier que le nom du département n'est pas vide
+    # Vérifier que le département n'est pas vide
     if ([string]::IsNullOrWhiteSpace($department)) {
         Write-Warning "Le département est vide, il sera ignoré."
         continue
     }
 
-    # Construire le DN complet pour l'OU du département
-    $departmentOUDN = "OU=$department,$departmentsParentOU"
+    # Créer l'OU pour le département
+    $departmentOUDN = CreateOU -ouName $department -parentPath $departmentsParentOU
 
-    # Créer l'OU du département si elle n'existe pas
-    CreateOU -ouDN $departmentOUDN -ouName $department -parentPath $departmentsParentOU
-
-    # Supprimer la protection contre la suppression accidentelle pour l'OU du département
-    Remove-DeletionProtection -ouDN $departmentOUDN
-
-    # Si des services sont renseignés, les créer sous l'OU du département
+    # Parcourir les services et les créer sous le département
     foreach ($service in $services) {
         if (-Not [string]::IsNullOrWhiteSpace($service) -and $service -ne "-") {
-            $serviceOUDN = "OU=$service,$departmentOUDN"
-
-            # Créer l'OU du service si elle n'existe pas
-            CreateOU -ouDN $serviceOUDN -ouName $service -parentPath $departmentOUDN
-
-            # Supprimer la protection contre la suppression accidentelle pour l'OU du service
-            Remove-DeletionProtection -ouDN $serviceOUDN
+            CreateOU -ouName $service -parentPath $departmentOUDN
         }
     }
 }
