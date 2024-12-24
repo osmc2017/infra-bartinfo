@@ -10,8 +10,8 @@ if (-Not (Test-Path $csvPath)) {
     exit
 }
 
-# Importer les données du fichier CSV
-$data = Import-Csv -Path $csvPath
+# Importer les données du fichier CSV et se concentrer uniquement sur les colonnes nécessaires
+$data = Import-Csv -Path $csvPath | Select-Object Département, Service
 
 # Spécifier l'OU parent pour les départements
 $departmentsParentOU = "OU=Departements,DC=demo,DC=lan"
@@ -59,7 +59,6 @@ function Remove-DeletionProtection {
 }
 
 # Extraire les départements et services uniques
-$departments = $data | Select-Object -ExpandProperty Département -Unique
 $departmentServices = $data | Group-Object Département
 
 # Créer les OUs pour chaque département et leurs services
@@ -84,7 +83,7 @@ foreach ($group in $departmentServices) {
 
     # Si des services sont renseignés, les créer sous l'OU du département
     foreach ($service in $services) {
-        if (-Not [string]::IsNullOrWhiteSpace($service)) {
+        if (-Not [string]::IsNullOrWhiteSpace($service) -and $service -ne "-") {
             $serviceOUDN = "OU=$service,$departmentOUDN"
 
             # Créer l'OU du service si elle n'existe pas
