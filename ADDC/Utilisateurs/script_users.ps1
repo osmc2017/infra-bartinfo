@@ -18,12 +18,6 @@ $data = Import-Csv -Path $csvPath
 # Mot de passe par défaut pour tous les utilisateurs
 $defaultPassword = ConvertTo-SecureString "Azerty1*" -AsPlainText -Force
 
-# Fonction pour nettoyer les noms et supprimer les caractères spéciaux sauf espaces
-function CleanName {
-    param ([string]$name)
-    return $name -replace "[^a-zA-Z0-9 ]", ""
-}
-
 # Parcourir chaque ligne du fichier CSV pour créer les utilisateurs
 foreach ($user in $data) {
     # Récupérer les informations utilisateur depuis le CSV
@@ -34,18 +28,14 @@ foreach ($user in $data) {
     $telephoneFixe = $user."Téléphone fixe"
     $telephonePortable = $user."Téléphone portable"
 
-    # Nettoyer les noms pour le SamAccountName et les DN
-    $cleanFirstName = CleanName $firstName
-    $cleanLastName = CleanName $lastName
-    $samAccountName = "$($cleanFirstName.Substring(0,1).ToLower())$($cleanLastName.ToLower())"
-    $cleanDepartment = CleanName $department
-    $cleanService = if (-Not [string]::IsNullOrWhiteSpace($service) -and $service -ne "-") { CleanName $service } else { "" }
+    # Construire le SamAccountName
+    $samAccountName = "$($firstName.Substring(0,1).ToLower())$($lastName.ToLower())"
 
     # Construire le Distinguished Name (DN) pour placer l'utilisateur dans la bonne OU
-    if (-Not [string]::IsNullOrWhiteSpace($cleanService)) {
-        $ouPath = "OU=$cleanService,OU=$cleanDepartment,OU=Departements,DC=demo,DC=lan"
+    if (-Not [string]::IsNullOrWhiteSpace($service) -and $service -ne "-") {
+        $ouPath = "OU=$service,OU=$department,OU=Departements,DC=demo,DC=lan"
     } else {
-        $ouPath = "OU=$cleanDepartment,OU=Departements,DC=demo,DC=lan"
+        $ouPath = "OU=$department,OU=Departements,DC=demo,DC=lan"
     }
 
     # Vérifier si l'OU existe
