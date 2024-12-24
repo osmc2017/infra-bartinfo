@@ -1,8 +1,8 @@
 # Importer le module Active Directory pour manipuler les objets dans l'AD
 Import-Module ActiveDirectory
 
-# Chemin vers votre fichier CSV contenant les départements et services => A adapter
-$csvPath = "C:\Path\To\VotreFichier.csv"
+# Chemin vers votre fichier CSV contenant les départements et services
+$csvPath = "C:\Users\Administrator\Desktop\Pharmgreen.csv"
 
 # Vérifier si le fichier CSV existe
 if (-Not (Test-Path $csvPath)) {
@@ -13,8 +13,8 @@ if (-Not (Test-Path $csvPath)) {
 # Importer les données du fichier CSV
 $data = Import-Csv -Path $csvPath
 
-# Spécifier l'OU parent pour les départements => A adapter à votre infrastructure AD DS
-$departmentsParentOU = "OU=Departments,DC=test,DC=lan"
+# Spécifier l'OU parent pour les départements
+$departmentsParentOU = "OU=Departements,DC=demo,DC=lan"
 
 # Fonction pour vérifier et créer une OU parent si elle n'existe pas
 function CreateOU {
@@ -43,12 +43,18 @@ function CreateOU {
 function Remove-DeletionProtection {
     param ([string]$ouDN)  # Chemin distingué de l'OU
 
-    try {
-        # Désactiver la protection contre la suppression accidentelle
-        Set-ADOrganizationalUnit -Identity $ouDN -ProtectedFromAccidentalDeletion $false
-    }
-    catch {
-        Write-Warning "Impossible de supprimer la protection contre la suppression accidentelle pour l'OU '$ouDN'. Détails de l'erreur : $_"
+    # Vérifier si l'OU existe avant d'essayer de modifier ses propriétés
+    if (Get-ADOrganizationalUnit -Filter { DistinguishedName -eq $ouDN } -ErrorAction SilentlyContinue) {
+        try {
+            # Désactiver la protection contre la suppression accidentelle
+            Set-ADOrganizationalUnit -Identity $ouDN -ProtectedFromAccidentalDeletion $false
+            Write-Host "Protection contre la suppression accidentelle désactivée pour l'OU '$ouDN'."
+        }
+        catch {
+            Write-Warning "Impossible de supprimer la protection contre la suppression accidentelle pour l'OU '$ouDN'. Détails de l'erreur : $_"
+        }
+    } else {
+        Write-Warning "L'OU '$ouDN' n'existe pas, impossible de modifier ses propriétés."
     }
 }
 
