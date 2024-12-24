@@ -18,10 +18,10 @@ $data = Import-Csv -Path $csvPath
 # Mot de passe par défaut pour tous les utilisateurs
 $defaultPassword = ConvertTo-SecureString "Azerty1*" -AsPlainText -Force
 
-# Fonction pour nettoyer les noms et supprimer les caractères spéciaux
+# Fonction pour nettoyer les noms et supprimer les caractères spéciaux sauf espaces
 function CleanName {
     param ([string]$name)
-    return $name -replace "[^a-zA-Z0-9]", ""
+    return $name -replace "[^a-zA-Z0-9 ]", ""
 }
 
 # Parcourir chaque ligne du fichier CSV pour créer les utilisateurs
