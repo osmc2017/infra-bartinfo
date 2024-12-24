@@ -48,6 +48,12 @@ foreach ($user in $data) {
         $ouPath = "OU=$cleanDepartment,OU=Departements,DC=demo,DC=lan"
     }
 
+    # Vérifier si l'OU existe
+    if (-Not (Get-ADOrganizationalUnit -Filter { DistinguishedName -eq $ouPath } -ErrorAction SilentlyContinue)) {
+        Write-Warning "L'OU spécifiée '$ouPath' n'existe pas. L'utilisateur '$firstName $lastName' sera ignoré."
+        continue
+    }
+
     # Vérifier si l'utilisateur existe déjà
     if (Get-ADUser -Filter { SamAccountName -eq $samAccountName } -ErrorAction SilentlyContinue) {
         Write-Warning "L'utilisateur avec SamAccountName '$samAccountName' existe déjà."
