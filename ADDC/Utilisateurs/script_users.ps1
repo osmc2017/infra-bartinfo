@@ -9,7 +9,7 @@ Foreach($Utilisateur in $CSVData) {
     # Création de variable pour remplir les champs lors de la création des utilisateurs
     $UtilisateurPrenom = $Utilisateur.Prénom
     $UtilisateurNom = $Utilisateur.Nom
-    $UtilisateurLogin = ($UtilisateurNom.Replace(" ", ".").Replace("'", "").ToLower() + "." + $UtilisateurPrenom.Substring(0,1).Replace(" ", "").ToLower()).Substring(0,20)
+    $UtilisateurLogin = $UtilisateurNom.Replace(" ", ".").ToLower() + "." + ($UtilisateurPrenom).Substring(0,1).Replace(" ", ".").ToLower()
     $UtilisateurEmail = "$UtilisateurLogin@demo.lan"
     $UtilisateurMotDePasse = "Azerty1*"
     $UtilisateurFonction = $Utilisateur.Fonction
