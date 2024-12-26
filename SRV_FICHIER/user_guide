@@ -1,183 +1,111 @@
-# User Guide : Configuration Automatisée des Dossiers pour les Utilisateurs et Groupes Active Directory
+# User Guide : Gestion des Dossiers pour Utilisateurs, Départements et Services
 
-Ce guide explique comment configurer un serveur de fichiers Windows Server pour créer des dossiers :
-- Un dossier personnel pour chaque utilisateur avec un accès exclusif.
-- Un dossier partagé pour chaque groupe avec un accès réservé aux membres du groupe.
-
-Le guide inclut deux scripts PowerShell pour automatiser ces tâches.
+Ce guide explique comment utiliser trois scripts pour :
+1. Créer des dossiers personnels pour chaque utilisateur et leur attribuer des permissions nécessaires.
+2. Créer des dossiers pour les **départements** et attribuer les permissions nécessaires aux utilisateurs.
+3. Créer des dossiers pour les **services** (sous-OUs des départements) dans un emplacement distinct et attribuer les permissions nécessaires aux utilisateurs.
 
 ---
 
 ## **Prérequis**
 
-1. Un serveur Windows Server configuré et joint à un domaine Active Directory.
-2. Le module PowerShell Active Directory installé sur le serveur.
-   - Si ce n’est pas encore fait, installez-le avec :
+1. **Structure AD** :
+   - Les utilisateurs doivent être organisés dans une OU spécifique pour les scripts utilisateurs.
+   - Les départements doivent être organisés en OUs directement sous `OU=Departements`.
+   - Les services doivent être organisés en sous-OUs des départements dans `OU=Departements`.
+   - Les utilisateurs doivent être directement présents dans les OUs des départements ou des services.
+
+2. **Chemins des dossiers** :
+   - Les dossiers des utilisateurs seront créés dans `D:\Partage\Utilisateurs`.
+   - Les dossiers des départements seront créés dans `D:\Partage\Departements`.
+   - Les dossiers des services seront créés dans `D:\Partage\Services`.
+
+3. **Permissions NTFS** :
+   - Les utilisateurs présents dans les OUs recevront des permissions **Contrôle total** sur leurs dossiers respectifs.
+   - Les administrateurs auront également **Contrôle total**.
+
+4. **Compte Administrateur avec PowerShell** :
+   - Les scripts doivent être exécutés avec un compte ayant les droits d’administrateur sur le serveur et dans Active Directory.
+
+---
+
+## **Script 1 : Création des Dossiers Personnels pour les Utilisateurs**
+
+### **Objectif**
+- Créer un dossier personnel pour chaque utilisateur dans `D:\Partage\Utilisateurs`.
+- Attribuer des permissions NTFS pour que chaque utilisateur ait accès uniquement à son propre dossier.
+
+### **Étapes**
+1. Exécutez le script pour identifier tous les utilisateurs dans l’OU définie pour les utilisateurs.
+2. Pour chaque utilisateur :
+   - Créez un dossier avec son **SamAccountName**.
+   - Appliquez les permissions suivantes :
+     - L’utilisateur a **Contrôle total** sur son propre dossier.
+     - Les administrateurs ont également **Contrôle total**.
+
+3. **Validation** :
+   - Connectez-vous avec un utilisateur pour vérifier qu’il peut accéder et modifier son propre dossier sans voir ceux des autres.
+
+---
+
+## **Script 2 : Création des Dossiers pour les Départements**
+
+### **Objectif**
+- Créer des dossiers pour chaque département dans `D:\Partage\Departements`.
+- Attribuer des permissions NTFS aux utilisateurs présents dans les OUs des départements.
+
+### **Étapes**
+1. Identifiez toutes les OUs de départements directement sous `OU=Departements`.
+2. Pour chaque OU :
+   - Créez un dossier avec le nom de l’OU.
+   - Récupérez les utilisateurs dans cette OU.
+   - Appliquez les permissions suivantes :
+     - Chaque utilisateur a **Contrôle total** sur le dossier du département.
+     - Les administrateurs ont également **Contrôle total**.
+
+3. **Validation** :
+   - Connectez-vous avec un utilisateur pour vérifier qu’il peut accéder et modifier les fichiers dans le dossier de son département.
+
+---
+
+## **Script 3 : Création des Dossiers pour les Services**
+
+### **Objectif**
+- Créer des dossiers pour chaque service (sous-OU des départements) dans `D:\Partage\Services`.
+- Attribuer des permissions NTFS aux utilisateurs présents dans les OUs des services.
+
+### **Étapes**
+1. Identifiez toutes les OUs de départements directement sous `OU=Departements`.
+2. Pour chaque département, identifiez les sous-OUs représentant les services.
+3. Pour chaque service :
+   - Créez un dossier avec le nom de l’OU du service.
+   - Récupérez les utilisateurs dans cette OU.
+   - Appliquez les permissions suivantes :
+     - Chaque utilisateur a **Contrôle total** sur le dossier du service.
+     - Les administrateurs ont également **Contrôle total**.
+
+4. **Validation** :
+   - Connectez-vous avec un utilisateur pour vérifier qu’il peut accéder et modifier les fichiers dans le dossier de son service.
+
+---
+
+## **Validation Globale**
+
+1. **Exécutez les scripts** :
+   - Vérifiez que les dossiers des utilisateurs, des départements et des services sont correctement créés.
+   - Assurez-vous que les utilisateurs des OUs ont bien les permissions configurées.
+
+2. **Testez les droits des utilisateurs** :
+   - Connectez-vous avec différents utilisateurs pour vérifier qu’ils ont accès uniquement à leurs dossiers respectifs (personnel, département ou service).
+
+3. **Commandes de vérification** :
+   - Vérifiez les utilisateurs dans une OU spécifique :
      ```powershell
-     Install-WindowsFeature RSAT-AD-PowerShell
+     Get-ADUser -Filter * -SearchBase "OU=<Nom>,OU=Departements,DC=bartinfo,DC=com"
      ```
-3. Les utilisateurs et groupes doivent déjà exister dans Active Directory.
-4. Un accès administrateur sur le serveur.
+   - Vérifiez les permissions d’un dossier :
+     ```powershell
+     Get-Acl -Path "D:\Partage\<Type>\<NomDossier>" | Format-List
+     ```
 
----
-
-## **Étape 1 : Préparer les Dossiers Racines**
-
-Avant d’exécuter les scripts, préparez les dossiers racines où les sous-dossiers des utilisateurs et des groupes seront créés.
-
-1. Connectez-vous au serveur de fichiers.
-2. Créez les dossiers racines suivants ou choisissez leurs emplacements :
-   - Pour les utilisateurs : `D:\Partage\Utilisateurs`
-   - Pour les groupes : `D:\Partage\Groupes`
-
-3. Assurez-vous que le serveur dispose de suffisamment d’espace disque pour accueillir tous les dossiers.
-
----
-
-## **Étape 2 : Script PowerShell pour les Dossiers Utilisateurs**
-
-### **Description**
-Ce script crée un dossier pour chaque utilisateur dans le domaine Active Directory et configure les permissions NTFS pour que seul l’utilisateur concerné ait accès.
-
-### **Script**
-
-Enregistrez ce script dans un fichier, par exemple `User_Folders.ps1` :
-
-```powershell
-# Variables
-$racinePartageUtilisateurs = "D:\Partage\Utilisateurs"  # Chemin de stockage des dossiers des utilisateurs
-$domainUsersGroup = "Domain Users"  # Groupe contenant les utilisateurs (par défaut dans AD)
-
-# Importer le module Active Directory
-Import-Module ActiveDirectory
-
-# Créer le dossier racine des utilisateurs s'il n'existe pas
-if (!(Test-Path -Path $racinePartageUtilisateurs)) {
-    New-Item -ItemType Directory -Path $racinePartageUtilisateurs
-}
-
-# Récupérer tous les utilisateurs du domaine
-$utilisateurs = Get-ADUser -Filter * -SearchBase "CN=Users,DC=bartinfo,DC=com" -Properties SamAccountName
-
-foreach ($utilisateur in $utilisateurs) {
-    $userFolder = Join-Path -Path $racinePartageUtilisateurs -ChildPath $utilisateur.SamAccountName
-    
-    # Vérifier si le dossier existe déjà
-    if (!(Test-Path -Path $userFolder)) {
-        New-Item -ItemType Directory -Path $userFolder
-        Write-Host "Dossier créé pour l'utilisateur : $($utilisateur.SamAccountName)"
-    }
-
-    # Configurer les permissions NTFS
-    $acl = Get-Acl -Path $userFolder
-    $acl.SetAccessRule((New-Object System.Security.AccessControl.FileSystemAccessRule("$($utilisateur.SamAccountName)", "FullControl", "ContainerInherit,ObjectInherit", "None", "Allow")))
-    Set-Acl -Path $userFolder -AclObject $acl
-    Write-Host "Permissions configurées pour l'utilisateur : $($utilisateur.SamAccountName)"
-}
-
-Write-Host "Création des dossiers utilisateurs terminée."
-```
-
-### **Exécution du Script**
-
-1. Enregistrez le script dans un fichier, par exemple : `C:\Scripts\User_Folders.ps1`.
-2. Ouvrez PowerShell en tant qu’administrateur.
-3. Activez l’exécution des scripts :
-   ```powershell
-   Set-ExecutionPolicy RemoteSigned -Scope Process
-   ```
-4. Exécutez le script :
-   ```powershell
-   .\C:\Scripts\User_Folders.ps1
-   ```
-
-### **Résultat Attendu**
-- Un dossier est créé pour chaque utilisateur dans `D:\Partage\Utilisateurs`.
-- Chaque dossier est accessible uniquement par l’utilisateur correspondant et les administrateurs.
-
----
-
-## **Étape 3 : Script PowerShell pour les Dossiers Groupes**
-
-### **Description**
-Ce script crée un dossier pour chaque groupe Active Directory et configure les permissions NTFS pour que seuls les membres du groupe aient accès.
-
-### **Script**
-
-Enregistrez ce script dans un fichier, par exemple `Group_Folders.ps1` :
-
-```powershell
-# Variables
-$racinePartageGroupes = "D:\Partage\Groupes"  # Chemin de stockage des dossiers des groupes
-
-# Importer le module Active Directory
-Import-Module ActiveDirectory
-
-# Créer le dossier racine des groupes s'il n'existe pas
-if (!(Test-Path -Path $racinePartageGroupes)) { 
-    New-Item -ItemType Directory -Path $racinePartageGroupes 
-}
-
-# Récupérer tous les groupes AD
-$groupes = Get-ADGroup -Filter * -Properties SamAccountName
-
-foreach ($groupe in $groupes) {
-    $groupFolder = Join-Path -Path $racinePartageGroupes -ChildPath $groupe.SamAccountName
-    
-    # Vérifier si le dossier existe déjà
-    if (!(Test-Path -Path $groupFolder)) {
-        New-Item -ItemType Directory -Path $groupFolder
-        Write-Host "Dossier créé pour le groupe : $($groupe.SamAccountName)"
-    }
-
-    # Configurer les permissions NTFS
-    $acl = Get-Acl -Path $groupFolder
-    $acl.SetAccessRule((New-Object System.Security.AccessControl.FileSystemAccessRule("$($groupe.SamAccountName)", "FullControl", "ContainerInherit,ObjectInherit", "None", "Allow")))
-    Set-Acl -Path $groupFolder -AclObject $acl
-    Write-Host "Permissions configurées pour le groupe : $($groupe.SamAccountName)"
-}
-
-Write-Host "Création des dossiers groupes terminée."
-```
-
-### **Exécution du Script**
-
-1. Enregistrez le script dans un fichier, par exemple : `C:\Scripts\Group_Folders.ps1`.
-2. Ouvrez PowerShell en tant qu’administrateur.
-3. Activez l’exécution des scripts :
-   ```powershell
-   Set-ExecutionPolicy RemoteSigned -Scope Process
-   ```
-4. Exécutez le script :
-   ```powershell
-   .\C:\Scripts\Group_Folders.ps1
-   ```
-
-### **Résultat Attendu**
-- Un dossier est créé pour chaque groupe dans `D:\Partage\Groupes`.
-- Chaque dossier est accessible uniquement par les membres du groupe correspondant et les administrateurs.
-
----
-
-## **Étape 4 : Validation des Résultats**
-
-1. Connectez-vous avec un utilisateur du domaine.
-2. Accédez au dossier partagé :
-   ```plaintext
-   \\ServeurDeFichiers\Partage\Utilisateurs
-   \\ServeurDeFichiers\Partage\Groupes
-   ```
-3. Vérifiez :
-   - Chaque utilisateur doit accéder uniquement à son dossier personnel.
-   - Les membres d’un groupe doivent accéder uniquement au dossier correspondant.
-
----
-
-## **Personnalisation Supplémentaire**
-
-- Vous pouvez modifier les chemins racines des dossiers en ajustant les variables `$racinePartageUtilisateurs` et `$racinePartageGroupes`.
-- Si vos utilisateurs ou groupes se trouvent dans des conteneurs spécifiques, ajustez les paramètres `SearchBase` pour les scripts.
-
----
-
-Avec ces scripts et ces étapes, vous pouvez configurer un serveur de fichiers qui gère automatiquement les permissions d'accès pour les utilisateurs et les groupes Active Directory.
+Ce guide vous permet de gérer efficacement la création et la configuration des dossiers pour les utilisateurs, départements et services en respectant la structure Active Directory. Si des ajustements sont nécessaires, contactez votre administrateur AD ou ajustez les scripts en conséquence.
