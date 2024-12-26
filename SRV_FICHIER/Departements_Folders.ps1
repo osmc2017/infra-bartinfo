@@ -1,5 +1,5 @@
 # Variables
-$racinePartageDepartements = "C:\Partage\Departements"  # Chemin racine pour les départements
+$racinePartageDepartements = "D:\Partage\Departements"  # Chemin racine pour les départements
 $ouDepartements = "OU=Departements,DC=bartinfo,DC=com"  # OU contenant les départements
 
 # Importer le module Active Directory
@@ -11,7 +11,7 @@ if (!(Test-Path -Path $racinePartageDepartements)) {
     Write-Host "Dossier racine créé : $racinePartageDepartements"
 }
 
-# Récupérer uniquement les OUs directement sous l'OU "Departements"
+# Récupérer uniquement les OUs directement sous "Departements"
 $departements = Get-ADOrganizationalUnit -Filter * -SearchBase $ouDepartements | Where-Object {
     ($_.DistinguishedName -split ',').Count -eq ($ouDepartements -split ',').Count + 1
 }
@@ -32,28 +32,9 @@ foreach ($departement in $departements) {
     # Supprimer l'héritage et définir des permissions spécifiques
     $acl.SetAccessRuleProtection($true, $false)  # Désactiver l'héritage et supprimer les règles héritées
 
-    # Ajouter une règle pour le groupe représentant le département
+    # Ajouter des permissions pour chaque utilisateur dans l'OU
     try {
-        $groupName = "Group_Departement_$departementName"  # Adaptez ce nom en fonction de votre convention
-        if (Get-ADGroup -Identity $groupName) {
-            $acl.SetAccessRule((New-Object System.Security.AccessControl.FileSystemAccessRule(
-                $groupName, 
-                "FullControl", 
-                "ContainerInherit,ObjectInherit", 
-                "None", 
-                "Allow"
-            )))
-            Write-Host "Permissions configurées pour le groupe : $groupName"
-        } else {
-            Write-Host "Le groupe $groupName n'existe pas. Permissions ignorées."
-        }
-    } catch {
-        Write-Host "Erreur lors de la configuration des permissions pour le groupe : $groupName"
-    }
-
-    # Ajouter des permissions pour chaque utilisateur du groupe
-    try {
-        $users = Get-ADGroupMember -Identity $groupName -Recursive | Where-Object { $_.objectClass -eq "user" }
+        $users = Get-ADUser -Filter * -SearchBase $departement.DistinguishedName -Properties SamAccountName
         foreach ($user in $users) {
             $acl.SetAccessRule((New-Object System.Security.AccessControl.FileSystemAccessRule(
                 $user.SamAccountName, 
@@ -65,7 +46,7 @@ foreach ($departement in $departements) {
             Write-Host "Permissions ajoutées pour l'utilisateur : $($user.SamAccountName)"
         }
     } catch {
-        Write-Host "Aucun utilisateur trouvé pour le groupe : $groupName ou erreur lors de l'attribution des droits."
+        Write-Host "Erreur lors de la récupération ou de l'attribution des droits pour les utilisateurs de l'OU : $departementName"
     }
 
     # Ajouter une règle pour les administrateurs
