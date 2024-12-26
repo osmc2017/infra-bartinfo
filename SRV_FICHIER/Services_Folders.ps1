@@ -40,19 +40,21 @@ foreach ($departement in $departements) {
         # Supprimer l'héritage et définir des permissions spécifiques
         $acl.SetAccessRuleProtection($true, $false)  # Désactiver l'héritage et supprimer les règles héritées
 
-        # Ajouter une règle pour le groupe représentant le service (si nécessaire)
+        # Ajouter des permissions pour chaque utilisateur dans l'OU du service
         try {
-            $groupName = "Group_Service_$serviceName"  # Adaptez ce nom en fonction de votre convention
-            $acl.SetAccessRule((New-Object System.Security.AccessControl.FileSystemAccessRule(
-                $groupName, 
-                "FullControl", 
-                "ContainerInherit,ObjectInherit", 
-                "None", 
-                "Allow"
-            )))
-            Write-Host "Permissions configurées pour le groupe : $groupName"
+            $users = Get-ADUser -Filter * -SearchBase $service.DistinguishedName -Properties SamAccountName
+            foreach ($user in $users) {
+                $acl.SetAccessRule((New-Object System.Security.AccessControl.FileSystemAccessRule(
+                    $user.SamAccountName, 
+                    "FullControl", 
+                    "ContainerInherit,ObjectInherit", 
+                    "None", 
+                    "Allow"
+                )))
+                Write-Host "Permissions ajoutées pour l'utilisateur : $($user.SamAccountName)"
+            }
         } catch {
-            Write-Host "Aucun groupe trouvé pour le service : $serviceName"
+            Write-Host "Erreur lors de la récupération ou de l'attribution des droits pour les utilisateurs de l'OU : $serviceName"
         }
 
         # Ajouter une règle pour les administrateurs
@@ -63,10 +65,15 @@ foreach ($departement in $departements) {
             "None", 
             "Allow"
         )))
+        Write-Host "Permissions configurées pour les administrateurs."
 
         # Appliquer les permissions au dossier
-        Set-Acl -Path $serviceFolder -AclObject $acl
-        Write-Host "Permissions appliquées au service : $serviceName"
+        try {
+            Set-Acl -Path $serviceFolder -AclObject $acl
+            Write-Host "Permissions appliquées au service : $serviceName"
+        } catch {
+            Write-Host "Erreur lors de l'application des permissions pour : $serviceFolder"
+        }
     }
 }
 
