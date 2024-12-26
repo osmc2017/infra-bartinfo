@@ -1,66 +1,75 @@
-# Import du module Active Directory
-Import-Module ActiveDirectory
+# Variables générales pour les partages réseau
+$baseUtilisateurs = "\\ServeurDeFichiers\Utilisateurs"
+$baseDepartements = "\\ServeurDeFichiers\Departements"
+$baseServices = "\\ServeurDeFichiers\Services"
 
-# OU principale où commencer la création des groupes
-$rootOU = "OU=Départements,DC=test,DC=lan"  # Remplace par ton chemin exact
+# Récupérer l'utilisateur connecté
+$user = $env:USERNAME
 
-# Fonction pour vérifier si un groupe existe
-function GroupExists {
-    param (
-        [string]$groupName
-    )
-    return (Get-ADGroup -Filter "Name -eq '$groupName'" -ErrorAction SilentlyContinue)
+# Charger le module Active Directory
+Import-Module ActiveDirectory -ErrorAction Stop
+
+# Récupérer l'OU complet de l'utilisateur
+try {
+    $userOU = (Get-ADUser -Identity $user -Properties DistinguishedName).DistinguishedName
+    Write-Host "Utilisateur connecté : $user, OU : $userOU"
+} catch {
+    Write-Host "Erreur lors de la récupération de l'OU pour l'utilisateur : $user"
+    exit
 }
 
-# Fonction pour créer un groupe par OU
-function CreateGroupForOU {
+# Extraire le département (OU parent direct) et le service (sous-OU)
+$ouParts = $userOU -split ","
+$departement = ($ouParts | Where-Object { $_ -like "OU=*" })[1] -replace "^OU=", ""
+$service = ($ouParts | Where-Object { $_ -like "OU=*" })[0] -replace "^OU=", ""
+
+# Fonction pour mapper un lecteur réseau
+function Map-Drive {
     param (
-        [string]$ouName,
-        [string]$ouPath
+        [string]$DriveLetter,
+        [string]$Path
     )
-
-    $groupName = "G_$ouName"
-
-    if (-not (GroupExists $groupName)) {
+    # Vérifie si le lecteur est déjà mappé
+    if (!(Get-PSDrive -Name $DriveLetter -ErrorAction SilentlyContinue)) {
         try {
-            New-ADGroup -Name $groupName -GroupScope Global -GroupCategory Security -Path $ouPath -Description "Groupe pour l'OU $ouName"
-            Write-Host "Groupe créé : $groupName dans $ouPath"
+            New-PSDrive -Name $DriveLetter -PSProvider FileSystem -Root $Path -Persist
+            Write-Host "Lecteur $DriveLetter mappé vers $Path"
         } catch {
-            Write-Host "Erreur lors de la création du groupe $groupName : $($_.Exception.Message)"
+            Write-Host "Erreur lors du mappage du lecteur $DriveLetter vers $Path : $_"
         }
     } else {
-        Write-Host "Le groupe $groupName existe déjà."
+        Write-Host "Lecteur $DriveLetter déjà mappé."
     }
 }
 
-# Fonction pour ajouter les utilisateurs d'une OU au groupe correspondant
-function AddUsersToGroup {
-    param (
-        [string]$groupName,
-        [string]$ouPath
-    )
-
-    $users = Get-ADUser -Filter * -SearchBase $ouPath -ErrorAction SilentlyContinue
-    foreach ($user in $users) {
-        try {
-            Add-ADGroupMember -Identity $groupName -Members $user.SamAccountName
-            Write-Host "Utilisateur $($user.SamAccountName) ajouté au groupe $groupName"
-        } catch {
-            Write-Host "Erreur lors de l'ajout de l'utilisateur $($user.SamAccountName) au groupe $groupName : $($_.Exception.Message)"
-        }
-    }
+# Mappage du dossier utilisateur personnel
+try {
+    $personalPath = Join-Path $baseUtilisateurs $user
+    Map-Drive -DriveLetter "U" -Path $personalPath
+} catch {
+    Write-Host "Erreur lors du mappage du dossier personnel pour : $user"
 }
 
-# Parcours des OUs pour créer un groupe et ajouter les utilisateurs
-$ous = Get-ADOrganizationalUnit -Filter * -SearchBase $rootOU
+# Mappage du dossier département
+if ($departement) {
+    try {
+        $departementPath = Join-Path $baseDepartements $departement
+        Map-Drive -DriveLetter "D" -Path $departementPath
+    } catch {
+        Write-Host "Erreur lors du mappage pour le département : $departement"
+    }
+} else {
+    Write-Host "Aucun département trouvé pour l'utilisateur : $user"
+}
 
-foreach ($ou in $ous) {
-    $ouName = $ou.Name
-    $ouPath = $ou.DistinguishedName
-
-    # Crée un groupe pour l'OU
-    CreateGroupForOU -ouName $ouName -ouPath $ouPath
-
-    # Ajoute les utilisateurs de l'OU au groupe
-    AddUsersToGroup -groupName "G_$ouName" -ouPath $ouPath
+# Mappage du dossier service
+if ($service) {
+    try {
+        $servicePath = Join-Path $baseServices $service
+        Map-Drive -DriveLetter "S" -Path $servicePath
+    } catch {
+        Write-Host "Erreur lors du mappage pour le service : $service"
+    }
+} else {
+    Write-Host "Aucun service trouvé pour l'utilisateur : $user"
 }
