@@ -1,95 +1,199 @@
-# Configuration des DNS sur un serveur Active Directory (AD)
+## Intégration d'une machine Debian à un Active Directory (AD)
 
-Configurer correctement le service DNS sur un serveur AD est crucial pour le bon fonctionnement du domaine. **Lors de l'installation d'Active Directory et de la promotion en contrôleur de domaine (DC), le service DNS est configuré automatiquement.** Cependant, ce guide vous permet de vérifier cette configuration et d'ajouter des zones ou enregistrements supplémentaires si nécessaire, y compris une zone de recherche inversée (reverse lookup zone).
-
----
-
-## Pré-requis
-- Un serveur Windows avec Active Directory installé.
-- Les rôles DNS installés (souvent configurés automatiquement avec l’installation d’Active Directory).
-- Accès administrateur sur le serveur.
-
----
-
-## Étapes de configuration
-
-### 1. Vérifier l’installation automatique du DNS
-1. Lors de l'installation d'Active Directory et de la promotion en contrôleur de domaine :
-    - Le rôle DNS est installé automatiquement si non présent.
-    - Une zone de recherche directe est créée automatiquement avec le même nom que votre domaine (ex. `test.lan`).
-    - Les enregistrements DNS essentiels sont configurés, comme les enregistrements **SRV**, **A**, et **NS**.
-    
-2. Pour vérifier cette configuration :
-    - Ouvrez le **Gestionnaire de serveur**.
-    - Allez dans **Outils** > **DNS**.
-    - Vérifiez que votre domaine est présent dans **Zones de recherche directe**.
-
-Si vous devez personnaliser ou compléter cette configuration, suivez les étapes ci-dessous.
+### Pré-requis
+1. **Débian pré-installée** : Vous devez avoir une machine Debian fonctionnelle.
+2. **Paquets nécessaires** :
+   - `realmd` : Gestion de l'intégration au domaine.
+   - `sssd` : Authentification centralisée.
+   - `krb5-user` : Outil pour Kerberos.
+   - `samba` et `samba-common-bin` : Configuration et gestion de Samba.
+   - `adcli` : Gestion des connexions au domaine.
+   - `oddjob` et `oddjob-mkhomedir` : Gestion automatique des répertoires personnels.
+   - `packagekit` : Gestion des paquets (optionnel, en cas d'environnement graphique).
 
 ---
 
-### 2. Créer une zone de recherche directe (Forward Lookup Zone)
-1. Dans la console DNS, faites un clic droit sur **Zones de recherche directe** > **Nouvelle zone**.
-2. Suivez l’assistant :
-    - **Type de zone** : Sélectionnez **Zone principale**.
-    - **Nom de la zone** : Entrez le nom de votre domaine (par ex. `test.lan`).
-    - **Fichiers de zone** : Gardez les paramètres par défaut (ex. `test.lan.dns`).
-    - **Mises à jour dynamiques** : Sélectionnez **Autoriser uniquement les mises à jour sécurisées** pour sécuriser les enregistrements DNS.
-3. Terminez l’assistant.
+### Étapes
 
-### 3. Créer une zone de recherche inversée (Reverse Lookup Zone) *(Optionnelle)*
-1. Faites un clic droit sur **Zones de recherche inversée** > **Nouvelle zone**.
-2. Suivez l’assistant :
-    - **Type de zone** : Sélectionnez **Zone principale**.
-    - **ID réseau** : Entrez les trois premiers octets de votre sous-réseau IP (par exemple, pour `192.168.1.0/24`, entrez `192.168.1`).
-    - **Fichiers de zone** : Gardez les paramètres par défaut.
-    - **Mises à jour dynamiques** : Sélectionnez **Autoriser uniquement les mises à jour sécurisées**.
-3. Terminez l’assistant.
+#### 1. Mettre à jour Debian
+**Description :** Cette étape assure que votre système dispose des dernières mises à jour de sécurité et de fonctionnalité.
+```bash
+sudo apt update && sudo apt upgrade -y
+```
 
-### 4. Configurer les enregistrements DNS *(Optionnel)*
+#### 2. Installer les paquets nécessaires
+**Description :** Installe les outils et services requis pour intégrer la machine Debian à l'Active Directory.
+```bash
+sudo apt install -y realmd sssd krb5-user samba-common-bin adcli oddjob oddjob-mkhomedir packagekit
+```
 
-#### a. Ajouter des enregistrements A (Forward Lookup)
-1. Dans **Zones de recherche directe**, faites un clic droit sur votre zone (ex. `test.lan`) > **Nouvel hôte (A ou AAAA)**.
-2. Remplissez les champs :
-    - **Nom** : Entrez le nom de l’hôte (par ex. `srv-ad`).
-    - **Adresse IP** : Entrez l’adresse IP de l’hôte (par ex. `192.168.1.10`).
-3. Cochez **Créer un pointeur PTR (si possible)** pour automatiquement créer l’enregistrement inversé.
-4. Cliquez sur **Ajouter un hôte**.
+#### 3. Configurer la résolution DNS
+**Description :** Permet à la machine de résoudre correctement les noms de domaine du serveur Active Directory.
 
-#### b. Ajouter des enregistrements PTR (Reverse Lookup)
-1. Si l’enregistrement PTR n’a pas été créé automatiquement, rendez-vous dans votre zone de recherche inversée.
-2. Faites un clic droit > **Nouvel enregistrement de pointeur (PTR)**.
-3. Remplissez les champs :
-    - **Adresse IP** : Entrez l’adresse IP de l’hôte (par ex. `192.168.1.10`).
-    - **Nom de l’hôte** : Entrez le nom complet de l’hôte (par ex. `srv-ad.test.lan`).
-4. Cliquez sur **OK**.
+1. Éditez le fichier :
+   ```bash
+   sudo nano /etc/resolv.conf
+   ```
 
-### 5. Tester la configuration DNS *(Optionnel)*
+2. Ajoutez l'adresse IP de votre serveur DNS (généralement le serveur AD) :
+   ```conf
+   nameserver <IP_DU_SERVEUR_DNS>
+   search bartinfo.com
+   ```
+   Remplacez `<IP_DU_SERVEUR_DNS>` par l'adresse IP de votre serveur AD et `bartinfo.com` par votre domaine.
 
-#### a. Avec `nslookup`
-1. Ouvrez une invite de commande sur un client ou le serveur.
-2. Testez la résolution directe :
-    ```cmd
-    nslookup srv-ad.test.lan
-    ```
-3. Testez la résolution inversée :
-    ```cmd
-    nslookup 192.168.1.10
-    ```
+3. Assurez-vous que le fichier n'est pas remplacé automatiquement par le système :
+   ```bash
+   sudo chattr +i /etc/resolv.conf
+   ```
+   (Vous pouvez enlever cette protection avec `sudo chattr -i /etc/resolv.conf` si besoin.)
 
-#### b. Vérifier la réplication (si plusieurs contrôleurs de domaine)
-- Utilisez l’outil **Repadmin** :
-    ```cmd
-    repadmin /showrepl
-    ```
+Vérifiez la résolution DNS :
+```bash
+nslookup dc1.bartinfo.com
+```
+Assurez-vous que le serveur DNS renvoie une réponse correcte.
 
 ---
 
-## Conseils supplémentaires
-- Activez l’intégration avec Active Directory lors de la création des zones pour sécuriser et simplifier la réplication DNS.
-- Sur les clients, configurez le serveur DNS pour qu’il pointe vers l’adresse IP du contrôleur de domaine.
-- Sur le serveur, vérifiez que le service DNS démarre automatiquement.
+#### 4. Rejoindre le domaine
+**Description :** Connecte la machine Debian à l'Active Directory et configure son intégration.
+
+1. Vérifiez que le domaine est détectable :
+   ```bash
+   sudo realm discover bartinfo.com
+   ```
+
+   Si le domaine est détecté, il apparaîtra avec ses informations.
+
+2. Joignez la machine au domaine :
+   ```bash
+   sudo realm join --user=Administrateur bartinfo.com
+   ```
+   Remplacez `Administrateur` par un utilisateur ayant les droits de rejoindre le domaine. Il vous sera demandé le mot de passe.
+
+3. Vérifiez que la machine a rejoint le domaine :
+   ```bash
+   realm list
+   ```
 
 ---
 
-Vous avez maintenant un DNS fonctionnel et sécurisé pour votre environnement Active Directory !
+#### 5. Configurer Kerberos (optionnel)
+**Description :** Configure le service Kerberos pour l'authentification centralisée avec l'Active Directory.
+
+Si vous devez ajuster la configuration Kerberos, éditez `/etc/krb5.conf` :
+```bash
+sudo nano /etc/krb5.conf
+```
+
+Assurez-vous que le fichier contient les lignes suivantes, adaptées à votre domaine :
+```ini
+[libdefaults]
+    default_realm = bartinfo.com
+
+[realms]
+    bartinfo.com = {
+        kdc = dc1.bartinfo.com
+        admin_server = dc1.bartinfo.com
+    }
+
+[domain_realm]
+    .bartinfo.com = bartinfo.com
+    bartinfo.com = bartinfo.com
+```
+
+---
+
+#### 6. Configurer SSSD
+**Description :** SSSD (System Security Services Daemon) gère l'authentification et la résolution des identités pour les utilisateurs du domaine.
+
+Éditez le fichier `/etc/sssd/sssd.conf` :
+```bash
+sudo nano /etc/sssd/sssd.conf
+```
+
+Ajoutez cette configuration :
+```ini
+[sssd]
+services = nss, pam
+domains = bartinfo.com
+
+[domain/bartinfo.com]
+id_provider = ad
+access_provider = ad
+override_homedir = /home/%u
+default_shell = /bin/bash
+```
+
+Appliquez les permissions correctes :
+```bash
+sudo chmod 600 /etc/sssd/sssd.conf
+```
+
+Redémarrez le service SSSD :
+```bash
+sudo systemctl restart sssd
+```
+
+---
+
+#### 7. Configurer Oddjob pour les répertoires personnels
+**Description :** Active la création automatique des répertoires personnels pour les utilisateurs du domaine lors de leur première connexion.
+
+Redémarrez le service Oddjob :
+```bash
+sudo systemctl enable oddjobd --now
+```
+
+Assurez-vous que `oddjob-mkhomedir` est correctement activé pour créer les répertoires personnels automatiquement.
+
+---
+
+#### 8. Tester l'authentification
+**Description :** Vérifie que les utilisateurs du domaine peuvent s'authentifier et que leurs informations sont correctement résolues.
+
+1. Assurez-vous que les utilisateurs du domaine peuvent être résolus :
+   ```bash
+   id utilisateur@bartinfo.com
+   ```
+   Remplacez `utilisateur` par un nom d'utilisateur du domaine.
+
+2. Essayez de vous connecter avec un utilisateur du domaine :
+   ```bash
+   su - utilisateur@bartinfo.com
+   ```
+
+---
+
+#### 9. (Optionnel) Automatiser le montage des répertoires personnels
+**Description :** Configure PAM pour créer automatiquement les répertoires personnels à la connexion des utilisateurs.
+
+Pour que les répertoires personnels soient automatiquement créés à la connexion (alternative à Oddjob), éditez `/etc/pam.d/common-session` et ajoutez :
+```bash
+session required pam_mkhomedir.so skel=/etc/skel umask=0077
+```
+
+---
+
+### Dépannage
+**Description :** Conseils pour résoudre les problèmes courants rencontrés lors de l'intégration.
+
+- Si la machine n'apparaît pas dans l'AD, vérifiez le nom d'hôte avec :
+  ```bash
+  hostnamectl
+  ```
+  Et assurez-vous qu'il est unique.
+
+- En cas de problème avec Kerberos, testez la connectivité :
+  ```bash
+  kinit utilisateur@bartinfo.com
+  ```
+
+- Vérifiez les journaux :
+  ```bash
+  sudo journalctl -xe
+  ```
+
+---
+

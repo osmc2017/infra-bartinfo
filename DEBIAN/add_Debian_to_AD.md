@@ -25,21 +25,21 @@ sudo apt update && sudo apt upgrade -y
 sudo apt install -y realmd sssd krb5-user samba-common-bin adcli oddjob oddjob-mkhomedir packagekit
 ```
 
-Pendant l'installation de `krb5-user`, entrez le **nom du domaine AD** (par ex. `test.lan`).
+Pendant l'installation de `krb5-user`, entrez le **nom du domaine AD** (par ex. `bartinfo.com`).
 
 ---
 
 #### 3. Rejoindre le domaine
 1. Vérifiez que le domaine est détectable :
    ```bash
-   sudo realm discover test.lan
+   sudo realm discover bartinfo.com
    ```
 
    Si le domaine est détecté, il apparaîtra avec ses informations.
 
 2. Joignez la machine au domaine :
    ```bash
-   sudo realm join --user=Administrateur test.lan
+   sudo realm join --user=Administrateur bartinfo.com
    ```
    Remplacez `Administrateur` par un utilisateur ayant les droits de rejoindre le domaine. Il vous sera demandé le mot de passe.
 
@@ -59,17 +59,17 @@ sudo nano /etc/krb5.conf
 Assurez-vous que le fichier contient les lignes suivantes, adaptées à votre domaine :
 ```ini
 [libdefaults]
-    default_realm = TEST.LAN
+    default_realm = bartinfo.com
 
 [realms]
-    TEST.LAN = {
-        kdc = dc1.test.lan
-        admin_server = dc1.test.lan
+    bartinfo.com = {
+        kdc = dc1.bartinfo.com
+        admin_server = dc1.bartinfo.com
     }
 
 [domain_realm]
-    .test.lan = TEST.LAN
-    test.lan = TEST.LAN
+    .bartinfo.com = bartinfo.com
+    bartinfo.com = bartinfo.com
 ```
 
 ---
@@ -84,9 +84,9 @@ Ajoutez cette configuration :
 ```ini
 [sssd]
 services = nss, pam
-domains = test.lan
+domains = bartinfo.com
 
-[domain/test.lan]
+[domain/bartinfo.com]
 id_provider = ad
 access_provider = ad
 override_homedir = /home/%u
@@ -118,13 +118,13 @@ Assurez-vous que `oddjob-mkhomedir` est correctement activé pour créer les ré
 #### 7. Tester l'authentification
 1. Assurez-vous que les utilisateurs du domaine peuvent être résolus :
    ```bash
-   id utilisateur@test.lan
+   id utilisateur@bartinfo.com
    ```
    Remplacez `utilisateur` par un nom d'utilisateur du domaine.
 
 2. Essayez de vous connecter avec un utilisateur du domaine :
    ```bash
-   su - utilisateur@test.lan
+   su - utilisateur@bartinfo.com
    ```
 
 ---
@@ -146,7 +146,7 @@ session required pam_mkhomedir.so skel=/etc/skel umask=0077
 
 - En cas de problème avec Kerberos, testez la connectivité :
   ```bash
-  kinit utilisateur@test.lan
+  kinit utilisateur@bartinfo.com
   ```
 
 - Vérifiez les journaux :
@@ -155,5 +155,3 @@ session required pam_mkhomedir.so skel=/etc/skel umask=0077
   ```
 
 ---
-
-Ce guide devrait suffire pour intégrer Debian à un domaine Active Directory. Si vous avez des questions ou des problèmes spécifiques, n'hésitez pas à demander !
