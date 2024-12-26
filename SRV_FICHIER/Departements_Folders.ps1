@@ -32,7 +32,7 @@ foreach ($departement in $departements) {
     # Supprimer l'héritage et définir des permissions spécifiques
     $acl.SetAccessRuleProtection($true, $false)  # Désactiver l'héritage et supprimer les règles héritées
 
-    # Ajouter une règle pour le groupe représentant le département (si nécessaire)
+    # Ajouter une règle pour le groupe représentant le département
     try {
         $groupName = "Group_Departement_$departementName"  # Adaptez ce nom en fonction de votre convention
         $acl.SetAccessRule((New-Object System.Security.AccessControl.FileSystemAccessRule(
@@ -43,6 +43,20 @@ foreach ($departement in $departements) {
             "Allow"
         )))
         Write-Host "Permissions configurées pour le groupe : $groupName"
+
+        # Ajouter des permissions pour chaque utilisateur du groupe
+        $users = Get-ADGroupMember -Identity $groupName -Recursive | Where-Object { $_.objectClass -eq "user" }
+        foreach ($user in $users) {
+            $acl.SetAccessRule((New-Object System.Security.AccessControl.FileSystemAccessRule(
+                $user.SamAccountName, 
+                "FullControl", 
+                "ContainerInherit,ObjectInherit", 
+                "None", 
+                "Allow"
+            )))
+            Write-Host "Permissions ajoutées pour l'utilisateur : $($user.SamAccountName)"
+        }
+
     } catch {
         Write-Host "Aucun groupe trouvé pour le département : $departementName"
     }
