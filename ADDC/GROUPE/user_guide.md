@@ -25,7 +25,7 @@ Ce script PowerShell permet de créer automatiquement un **groupe de sécurité*
 ## **Instructions**
 ### **Étape 1 : Configuration initiale**
 1. Ouvrez PowerShell sur une machine membre du domaine Active Directory.
-2. Copiez le script suivant dans un fichier `.ps1` (par exemple, `CreateGroupsByOU.ps1`).
+2. Copiez le script suivant dans un fichier `.ps1` (par exemple, `script_group_OU.ps1`).
 
 ```powershell
 # Import du module Active Directory
@@ -111,7 +111,7 @@ foreach ($ou in $ous) {
    ```
 3. Exécutez le script :
    ```powershell
-   .\CreateGroupsByOU.ps1
+   .\script_group_OU.ps1
    ```
 
 ---
