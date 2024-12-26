@@ -12,7 +12,9 @@ if (!(Test-Path -Path $racinePartageDepartements)) {
 }
 
 # Récupérer uniquement les OUs directement sous l'OU "Departements"
-$departements = Get-ADOrganizationalUnit -Filter * -SearchBase $ouDepartements
+$departements = Get-ADOrganizationalUnit -Filter * -SearchBase $ouDepartements | Where-Object {
+    ($_.DistinguishedName -split ',').Count -eq ($ouDepartements -split ',').Count + 1
+}
 
 foreach ($departement in $departements) {
     $departementName = ($departement.DistinguishedName -split ',')[0] -replace "^OU=", ""
