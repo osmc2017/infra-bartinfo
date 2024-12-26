@@ -5,7 +5,7 @@ Dans ce sprint nous allons installer GLPI sur un serveur et l'intégrer à l'AD 
 - faire tuto et fiche ok
 - importer client dans GLPI ok
 - Installer windows server sur une nouvelle machine en vue d'une mise en place d'un serveur de fichier. ok
-- configuration serveur fichier et integration ad. en cours
-- creation fichier via script. en cours
+- configuration serveur fichier et integration ad. OK
+- creation fichier via script. OK
 
 
