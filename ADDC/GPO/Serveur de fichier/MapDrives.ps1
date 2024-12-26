@@ -6,18 +6,29 @@ $baseServices = "\\ServeurDeFichiers\Services"
 # Récupérer l'utilisateur connecté
 $user = $env:USERNAME
 
-# Ajouter une ligne de log pour vérifier l'utilisateur
-Write-Host "Utilisateur connecté : $user"
+# Charger le module Active Directory
+Import-Module ActiveDirectory -ErrorAction Stop
 
-# Récupérer les groupes AD de l'utilisateur
-Import-Module ActiveDirectory
-$groups = (Get-ADUser -Identity $user -Properties MemberOf).MemberOf
+# Récupérer l'OU complet de l'utilisateur
+try {
+    $userOU = (Get-ADUser -Identity $user -Properties DistinguishedName).DistinguishedName
+    Write-Host "Utilisateur connecté : $user, OU : $userOU"
+} catch {
+    Write-Host "Erreur lors de la récupération de l'OU pour l'utilisateur : $user"
+    exit
+}
 
-# Ajouter une ligne pour vérifier les groupes de l'utilisateur
-Write-Host "Groupes de l'utilisateur : $($groups -join ', ')"
+# Extraire le département (OU parent direct) et le service (sous-OU)
+$ouParts = $userOU -split ","
+$departement = ($ouParts | Where-Object { $_ -like "OU=*" })[1] -replace "^OU=", ""
+$service = ($ouParts | Where-Object { $_ -like "OU=*" })[0] -replace "^OU=", ""
 
 # Fonction pour mapper un lecteur réseau
-function Map-Drive ($DriveLetter, $Path) {
+function Map-Drive {
+    param (
+        [string]$DriveLetter,
+        [string]$Path
+    )
     # Vérifie si le lecteur est déjà mappé
     if (!(Get-PSDrive -Name $DriveLetter -ErrorAction SilentlyContinue)) {
         try {
@@ -31,24 +42,34 @@ function Map-Drive ($DriveLetter, $Path) {
     }
 }
 
-# Mappage du dossier personnel
-$personalPath = Join-Path $baseUtilisateurs $user
-Map-Drive -DriveLetter "U" -Path $personalPath
-
-# Mappage pour le département
-foreach ($group in $groups) {
-    if ($group -like "*Departement*") {
-        $departement = $group -replace "CN=Group_Departement_", "" -replace ",.*", ""
-        $departementPath = Join-Path $baseDepartements $departement
-        Map-Drive -DriveLetter "D" -Path $departementPath
-    }
+# Mappage du dossier utilisateur personnel
+try {
+    $personalPath = Join-Path $baseUtilisateurs $user
+    Map-Drive -DriveLetter "U" -Path $personalPath
+} catch {
+    Write-Host "Erreur lors du mappage du dossier personnel pour : $user"
 }
 
-# Mappage pour le service
-foreach ($group in $groups) {
-    if ($group -like "*Service*") {
-        $service = $group -replace "CN=Group_Service_", "" -replace ",.*", ""
+# Mappage du dossier département
+if ($departement) {
+    try {
+        $departementPath = Join-Path $baseDepartements $departement
+        Map-Drive -DriveLetter "D" -Path $departementPath
+    } catch {
+        Write-Host "Erreur lors du mappage pour le département : $departement"
+    }
+} else {
+    Write-Host "Aucun département trouvé pour l'utilisateur : $user"
+}
+
+# Mappage du dossier service
+if ($service) {
+    try {
         $servicePath = Join-Path $baseServices $service
         Map-Drive -DriveLetter "S" -Path $servicePath
+    } catch {
+        Write-Host "Erreur lors du mappage pour le service : $service"
     }
+} else {
+    Write-Host "Aucun service trouvé pour l'utilisateur : $user"
 }
