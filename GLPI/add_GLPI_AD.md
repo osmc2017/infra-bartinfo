@@ -61,6 +61,8 @@ Cette extension sera automatiquement activée.
 - **Mot de passe du compte** : Mot de passe associé
 - **Champ de l’identifiant** : `userPrincipalName`
 - **Champ de synchronisation** : `objectGUID`
+  
+![Capture d'écran 2024-12-26 101918](https://github.com/user-attachments/assets/472ecea3-de47-4ee3-a813-f491a4fee53c)
 
 5. Cliquez sur **Ajouter**.
 
@@ -84,6 +86,8 @@ GLPI effectuera un test de connexion LDAP. Si une erreur survient, vérifiez que
    - **Importation de nouveaux utilisateurs** : pour ajouter en masse des comptes AD.
    - **Synchroniser les utilisateurs existants** : pour mettre à jour les comptes déjà liés.
 4. Sélectionnez les utilisateurs ou groupes souhaités et cliquez sur **Actions**.
+
+![Capture d'écran 2024-12-26 102511](https://github.com/user-attachments/assets/f345ce27-6208-4574-9044-2a7befedd6a8)
 
 ---
 
