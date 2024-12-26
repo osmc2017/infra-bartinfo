@@ -11,7 +11,7 @@ Les règles de pare-feu respecteront les principes suivants :
 
 - **VLAN 5** (DC) peut communiquer avec tous les VLANs.
 - **VLAN 10** (Admins) peut accéder aux VLANs 5 et 20.
-- **VLAN 20** (Serveurs) peut uniquement accéder au VLAN 5 (DC).
+- **VLAN 20** (Serveurs) peut uniquement accéder au VLAN 5 (DC) et aux services critiques tel que LDAP.
 - **VLAN 40** (Utilisateurs) peut uniquement accéder au VLAN 20 (Serveurs) sur des services spécifiques.
 - Tous les VLANs peuvent accéder à Internet selon les règles configurées.
 - **VLAN 40 (Utilisateurs)** peut accéder au **VLAN 5 (DC)** uniquement pour les services critiques comme l'authentification Active Directory et DNS.
@@ -91,6 +91,13 @@ Les règles de pare-feu respecteront les principes suivants :
      - **Protocol** : Any
      - **Source** : `VLAN20 net`
      - **Destination** : `VLAN05 subnet`.
+   - **Permettre un accès limité au VLAN 5 (DC)** pour les services critiques :
+     - **Action** : Pass
+     - **Protocol** : TCP/UDP
+     - **Source** : `VLAN40 net`
+     - **Destination** : `VLAN05 subnet`
+     - **Ports** :
+       - **LDAP** : 389 (TCP/UDP)
    - **Permettre l'accès à Internet** :
      - **Action** : Pass
      - **Protocol** : Any
