@@ -165,6 +165,8 @@ Le script fournit des messages pour chaque étape :
 ## Points de vigilance
 - **Noms valides :** Les noms de départements et de services doivent respecter les restrictions de nommage d'Active Directory (pas de caractères interdits comme `/`, `\`, etc.).
 - **Exécution en environnement de test :** Testez toujours le script dans un environnement de test avant de l'exécuter en production.
+- **Encodage du fichier csv :** Bien vérifier que le fichier csv soit encodé en UTF8.
+- **Encodage du script :** Bien vérifier que le script soit encodé en ANSI
 
 ---
 
