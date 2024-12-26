@@ -1,5 +1,5 @@
 # Variables
-$racinePartageDepartements = "D:\Partage\Departements"  # Chemin racine pour les départements
+$racinePartageDepartements = "C:\Partage\Departements"  # Chemin racine pour les départements
 $ouDepartements = "OU=Departements,DC=bartinfo,DC=com"  # OU contenant les départements
 
 # Importer le module Active Directory
@@ -35,16 +35,24 @@ foreach ($departement in $departements) {
     # Ajouter une règle pour le groupe représentant le département
     try {
         $groupName = "Group_Departement_$departementName"  # Adaptez ce nom en fonction de votre convention
-        $acl.SetAccessRule((New-Object System.Security.AccessControl.FileSystemAccessRule(
-            $groupName, 
-            "FullControl", 
-            "ContainerInherit,ObjectInherit", 
-            "None", 
-            "Allow"
-        )))
-        Write-Host "Permissions configurées pour le groupe : $groupName"
+        if (Get-ADGroup -Identity $groupName) {
+            $acl.SetAccessRule((New-Object System.Security.AccessControl.FileSystemAccessRule(
+                $groupName, 
+                "FullControl", 
+                "ContainerInherit,ObjectInherit", 
+                "None", 
+                "Allow"
+            )))
+            Write-Host "Permissions configurées pour le groupe : $groupName"
+        } else {
+            Write-Host "Le groupe $groupName n'existe pas. Permissions ignorées."
+        }
+    } catch {
+        Write-Host "Erreur lors de la configuration des permissions pour le groupe : $groupName"
+    }
 
-        # Ajouter des permissions pour chaque utilisateur du groupe
+    # Ajouter des permissions pour chaque utilisateur du groupe
+    try {
         $users = Get-ADGroupMember -Identity $groupName -Recursive | Where-Object { $_.objectClass -eq "user" }
         foreach ($user in $users) {
             $acl.SetAccessRule((New-Object System.Security.AccessControl.FileSystemAccessRule(
@@ -56,9 +64,8 @@ foreach ($departement in $departements) {
             )))
             Write-Host "Permissions ajoutées pour l'utilisateur : $($user.SamAccountName)"
         }
-
     } catch {
-        Write-Host "Aucun groupe trouvé pour le département : $departementName"
+        Write-Host "Aucun utilisateur trouvé pour le groupe : $groupName ou erreur lors de l'attribution des droits."
     }
 
     # Ajouter une règle pour les administrateurs
@@ -69,10 +76,15 @@ foreach ($departement in $departements) {
         "None", 
         "Allow"
     )))
+    Write-Host "Permissions configurées pour les administrateurs."
 
     # Appliquer les permissions au dossier
-    Set-Acl -Path $departementFolder -AclObject $acl
-    Write-Host "Permissions appliquées au département : $departementName"
+    try {
+        Set-Acl -Path $departementFolder -AclObject $acl
+        Write-Host "Permissions appliquées au département : $departementName"
+    } catch {
+        Write-Host "Erreur lors de l'application des permissions pour : $departementFolder"
+    }
 }
 
 Write-Host "Création des dossiers départements terminée."
