@@ -2,7 +2,7 @@
 Import-Module ActiveDirectory
 
 # OU principale contenant les départements
-$rootOU = "OU=Départements,DC=bartinfo,DC=com"  # Remplace par ton chemin exact
+$rootOU = "OU=Départements,DC=test,DC=lan"  # Remplace par ton chemin exact
 
 # Parcours des départements
 $departements = Get-ADOrganizationalUnit -Filter * -SearchBase $rootOU
@@ -20,8 +20,8 @@ foreach ($departement in $departements) {
         Write-Host "Le groupe $deptGroupName existe déjà."
     }
 
-    # Parcours des services dans le département
-    $services = Get-ADOrganizationalUnit -Filter * -SearchBase $deptPath
+    # Parcours des services dans le département (uniquement les OUs enfants directs)
+    $services = Get-ADOrganizationalUnit -Filter * -SearchBase $deptPath | Where-Object { $_.DistinguishedName -notlike "*OU=Départements*" }
 
     foreach ($service in $services) {
         $serviceName = $service.Name
