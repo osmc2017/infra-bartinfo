@@ -11,9 +11,7 @@ L’infrastructure BartInfo inclura les éléments suivants :
 - **Serveur GLPI sous Debian** : Outil de gestion des tickets et inventaire, intégré à Active Directory.
 - **Serveur de fichier sous Windows server** : Serveur windows qui permettra de stocker les dossiers partagés
 - **Serveur de sauvegarde sous Debian** : Ce serveur sauvegardera les dossier partager et le serveur AD sur des disques en raid 1
-- **Clients** :
-  - 10 utilisateurs organisés dans des Unités d’Organisation (3 UO).
-  - 3 postes physiques (2 pour les clients et 1 pour l’administrateur).
+- **Clients** 
 
 
 L'infrastructure sera mise en place sur des Vms Proxmox.
@@ -23,27 +21,25 @@ L'infrastructure sera mise en place sur des Vms Proxmox.
 1. **Formation et pratique** : Approfondir les compétences en infrastructure réseau et en gestion des services IT.
 2. **Planification Agile** : Structurer le travail en sprints pour une gestion optimale.
 
-## Planification des sprints
+## Etape dans l'ordre chronologique
 
-### Sprint 1 : Mise en place générale
-- Créer la liste des serveurs et la table de routage.
-- Installer la VM pfSense sur Proxmox.
-- Configurer un switch virtuel avec des VLANs sur Proxmox.
+- Installation et configuration de la Vm pfsense
+- Installation et configuration de la Vm ADDC
+  - Configuration du DNS
+  - Mise en place des OU 
+  - Mise en Place des Utilisateurs
+  - Mise en place des groupes
+- Installation et configuration de la Vm GLPI:
+  - Integration à l'AD
+  - Importation de la base données LDAP
+- Installation et configuration du Serveur de fichier:
+  - Intégration à l'AD
+  - Utilisation des scripts pour la création des dossiers
+- Mise en place des GPO:
+  - GPO pour le mappage des dossiers partagés
+  - GPO pour le déploiement de l'outils GLPI sur les clients
+- Installation ett configuration de la Vm sauvegarde
 
-### Sprint 2 : Installation et configuration de l'Active Directory
-- Installer et configurer le serveur Active Directory avec un contrôleur de domaine.
-- Créer et importer les utilisateurs dans l’AD.
-- Configurer les Unités d’Organisation (3 UO).
-- Définir et appliquer des règles de GPO.
-- Configurer le serveur DHCP dans pfSense pour gérer les adresses IP dynamiques.
-
-### Sprint 3 : Installation de GLPI et intégration
-- Installer le serveur GLPI.
-- Intégrer GLPI à l'Active Directory pour l’authentification.
-- Déployer l’agent GLPI sur les machines clients (2 postes utilisateurs et 1 poste administrateur).
-
-### Sprint 4 : À définir
-Ce sprint sera réservé à l’optimisation, la mise en place d’outils supplémentaires, ou d’autres éléments en fonction des besoins identifiés au cours des sprints précédents.
 
 ## Ressources requises
 
