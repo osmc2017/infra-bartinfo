@@ -1,5 +1,6 @@
 # Variables
 $racinePartageGroupes = "D:\Partage\Groupes"  # Chemin de stockage des dossiers des groupes
+$searchBase = "OU=departements,DC=bartinfo,DC=com"  # OU où se trouvent les groupes
 
 # Importer le module Active Directory
 Import-Module ActiveDirectory
@@ -7,11 +8,13 @@ Import-Module ActiveDirectory
 # Créer le dossier racine des groupes s'il n'existe pas
 if (!(Test-Path -Path $racinePartageGroupes)) { 
     New-Item -ItemType Directory -Path $racinePartageGroupes 
+    Write-Host "Dossier racine créé : $racinePartageGroupes"
 }
 
-# Récupérer tous les groupes AD
-$groupes = Get-ADGroup -Filter * -Properties SamAccountName
+# Récupérer tous les groupes dans l'OU 'departements' et ses sous-OUs
+$groupes = Get-ADGroup -Filter * -SearchBase $searchBase
 
+# Parcours des groupes trouvés
 foreach ($groupe in $groupes) {
     $groupFolder = Join-Path -Path $racinePartageGroupes -ChildPath $groupe.SamAccountName
     
