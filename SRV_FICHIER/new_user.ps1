@@ -26,7 +26,7 @@ foreach ($utilisateur in $utilisateurs) {
     # Configurer les permissions NTFS
     $acl = Get-Acl -Path $userFolder
 
-    # Supprimer les permissions héritées si nécessaire
+    # Supprimer les permissions héritées
     $acl.SetAccessRuleProtection($true, $false)  # Désactiver l'héritage et supprimer les règles héritées
 
     # Ajouter une règle pour donner à l'utilisateur un contrôle total
