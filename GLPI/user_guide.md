@@ -12,4 +12,3 @@
 
 ## Intégration à l'AD
 
-Suivre ce tuto
