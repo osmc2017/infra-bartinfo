@@ -111,6 +111,8 @@ L'identifiant SamAccountName existe déjà dans l'AD.
 ### Étape 1 : Préparer l'environnement
 1. Assurez-vous que les OUs nécessaires ont été créées dans Active Directory.
 2. Vérifiez que le fichier CSV est correctement formaté et placé à l'emplacement spécifié.
+3. Encodage du fichier csv : Bien vérifier que le fichier csv soit encodé en UTF8.
+4. Encodage du script : Bien vérifier que le script soit encodé en ANSI
 
 ### Étape 2 : Lancer le script
 1. Ouvrez PowerShell en tant qu'administrateur.
