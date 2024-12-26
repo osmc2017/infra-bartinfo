@@ -1,14 +1,14 @@
 # Variables
-$racinePartageDepartements = "D:\Partage\Departements"  # Chemin racine pour les départements
+$racinePartageServices = "D:\Partage\Services"  # Chemin racine pour les services
 $ouDepartements = "OU=Departements,DC=bartinfo,DC=com"  # OU contenant les départements
 
 # Importer le module Active Directory
 Import-Module ActiveDirectory
 
-# Vérification et création du dossier racine des départements
-if (!(Test-Path -Path $racinePartageDepartements)) {
-    Write-Host "Erreur : Le dossier racine des départements n'existe pas. Exécution annulée."
-    exit
+# Vérification et création du dossier racine des services
+if (!(Test-Path -Path $racinePartageServices)) {
+    New-Item -ItemType Directory -Path $racinePartageServices
+    Write-Host "Dossier racine créé : $racinePartageServices"
 }
 
 # Récupérer uniquement les OUs directement sous "Departements"
@@ -18,13 +18,6 @@ $departements = Get-ADOrganizationalUnit -Filter * -SearchBase $ouDepartements |
 
 foreach ($departement in $departements) {
     $departementName = ($departement.DistinguishedName -split ',')[0] -replace "^OU=", ""
-    $departementFolder = Join-Path -Path $racinePartageDepartements -ChildPath $departementName
-
-    # Vérifier si le dossier du département existe
-    if (!(Test-Path -Path $departementFolder)) {
-        Write-Host "Erreur : Le dossier pour le département $departementName n'existe pas. Skipping..."
-        continue
-    }
 
     # Récupérer les sous-OUs (services) dans chaque département
     $services = Get-ADOrganizationalUnit -Filter * -SearchBase $departement.DistinguishedName | Where-Object {
@@ -33,12 +26,12 @@ foreach ($departement in $departements) {
 
     foreach ($service in $services) {
         $serviceName = ($service.DistinguishedName -split ',')[0] -replace "^OU=", ""
-        $serviceFolder = Join-Path -Path $departementFolder -ChildPath $serviceName
+        $serviceFolder = Join-Path -Path $racinePartageServices -ChildPath $serviceName
 
         # Vérifier si le dossier du service existe déjà
         if (!(Test-Path -Path $serviceFolder)) {
             New-Item -ItemType Directory -Path $serviceFolder
-            Write-Host "Dossier créé pour le service : $serviceName dans $departementName"
+            Write-Host "Dossier créé pour le service : $serviceName"
         }
 
         # Configurer les permissions NTFS
