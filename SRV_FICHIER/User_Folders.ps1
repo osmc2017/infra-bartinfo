@@ -11,7 +11,7 @@ if (!(Test-Path -Path $racinePartageUtilisateurs)) {
 }
 
 # Récupérer tous les utilisateurs du domaine
-$utilisateurs = Get-ADUser -Filter * -SearchBase "CN=Users,DC=bartinfo,DC=com" -Properties SamAccountName
+$utilisateurs = Get-ADUser -Filter * -SearchBase "OU=Departements,DC=bartinfo,DC=com" -Properties SamAccountName
 
 foreach ($utilisateur in $utilisateurs) {
     $userFolder = Join-Path -Path $racinePartageUtilisateurs -ChildPath $utilisateur.SamAccountName
