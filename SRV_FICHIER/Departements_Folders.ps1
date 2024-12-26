@@ -1,6 +1,6 @@
 # Variables
-$racinePartageDepartements = "C:\Partage\Departements"  # Chemin racine pour les départements
-$ouDepartements = "OU=Departements,DC=bartinfo,DC=com"  # OU contenant les groupes des départements
+$racinePartageDepartements = "D:\Partage\Departements"  # Chemin racine pour les départements
+$ouDepartements = "OU=Departements,DC=bartinfo,DC=com"  # OU contenant les départements
 
 # Importer le module Active Directory
 Import-Module ActiveDirectory
@@ -11,16 +11,17 @@ if (!(Test-Path -Path $racinePartageDepartements)) {
     Write-Host "Dossier racine créé : $racinePartageDepartements"
 }
 
-# Récupérer tous les groupes dans l'OU des départements
-$groupesDepartements = Get-ADGroup -Filter * -SearchBase $ouDepartements
+# Récupérer uniquement les OUs directement sous l'OU "Departements"
+$departements = Get-ADOrganizationalUnit -Filter * -SearchBase $ouDepartements
 
-foreach ($groupe in $groupesDepartements) {
-    $departementFolder = Join-Path -Path $racinePartageDepartements -ChildPath $groupe.SamAccountName
+foreach ($departement in $departements) {
+    $departementName = ($departement.DistinguishedName -split ',')[0] -replace "^OU=", ""
+    $departementFolder = Join-Path -Path $racinePartageDepartements -ChildPath $departementName
 
     # Vérifier si le dossier existe déjà
     if (!(Test-Path -Path $departementFolder)) {
         New-Item -ItemType Directory -Path $departementFolder
-        Write-Host "Dossier créé pour le département : $($groupe.SamAccountName)"
+        Write-Host "Dossier créé pour le département : $departementName"
     }
 
     # Configurer les permissions NTFS
@@ -29,14 +30,20 @@ foreach ($groupe in $groupesDepartements) {
     # Supprimer l'héritage et définir des permissions spécifiques
     $acl.SetAccessRuleProtection($true, $false)  # Désactiver l'héritage et supprimer les règles héritées
 
-    # Ajouter une règle pour le groupe représentant le département
-    $acl.SetAccessRule((New-Object System.Security.AccessControl.FileSystemAccessRule(
-        "$($groupe.SamAccountName)", 
-        "FullControl", 
-        "ContainerInherit,ObjectInherit", 
-        "None", 
-        "Allow"
-    )))
+    # Ajouter une règle pour le groupe représentant le département (si nécessaire)
+    try {
+        $groupName = "Group_Departement_$departementName"  # Adaptez ce nom en fonction de votre convention
+        $acl.SetAccessRule((New-Object System.Security.AccessControl.FileSystemAccessRule(
+            $groupName, 
+            "FullControl", 
+            "ContainerInherit,ObjectInherit", 
+            "None", 
+            "Allow"
+        )))
+        Write-Host "Permissions configurées pour le groupe : $groupName"
+    } catch {
+        Write-Host "Aucun groupe trouvé pour le département : $departementName"
+    }
 
     # Ajouter une règle pour les administrateurs
     $acl.SetAccessRule((New-Object System.Security.AccessControl.FileSystemAccessRule(
@@ -49,7 +56,7 @@ foreach ($groupe in $groupesDepartements) {
 
     # Appliquer les permissions au dossier
     Set-Acl -Path $departementFolder -AclObject $acl
-    Write-Host "Permissions configurées pour le département : $($groupe.SamAccountName)"
+    Write-Host "Permissions appliquées au département : $departementName"
 }
 
 Write-Host "Création des dossiers départements terminée."
