@@ -25,9 +25,31 @@ foreach ($utilisateur in $utilisateurs) {
 
     # Configurer les permissions NTFS
     $acl = Get-Acl -Path $userFolder
-    $acl.SetAccessRule((New-Object System.Security.AccessControl.FileSystemAccessRule("$($utilisateur.SamAccountName)", "FullControl", "ContainerInherit,ObjectInherit", "None", "Allow")))
+
+    # Supprimer les permissions héritées si nécessaire
+    $acl.SetAccessRuleProtection($true, $false)  # Désactiver l'héritage et supprimer les règles héritées
+
+    # Ajouter une règle pour donner à l'utilisateur un contrôle total
+    $acl.SetAccessRule((New-Object System.Security.AccessControl.FileSystemAccessRule(
+        "$($utilisateur.SamAccountName)", 
+        "FullControl", 
+        "ContainerInherit,ObjectInherit", 
+        "None", 
+        "Allow"
+    )))
+
+    # Ajouter une règle pour les administrateurs
+    $acl.SetAccessRule((New-Object System.Security.AccessControl.FileSystemAccessRule(
+        "Administrators", 
+        "FullControl", 
+        "ContainerInherit,ObjectInherit", 
+        "None", 
+        "Allow"
+    )))
+
+    # Appliquer les permissions au dossier
     Set-Acl -Path $userFolder -AclObject $acl
     Write-Host "Permissions configurées pour l'utilisateur : $($utilisateur.SamAccountName)"
 }
 
-Write-Host "Création des dossiers utilisateurs terminée."
+Write-Host "Création des dossiers utilisateurs et configuration des permissions terminée."
