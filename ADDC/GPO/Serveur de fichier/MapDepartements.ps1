@@ -40,7 +40,7 @@ try {
 }
 
 # Fonction pour mapper un lecteur réseau
-function Map-Drive {
+function Map_Drive {
     param (
         [string]$DriveLetter,
         [string]$Path
