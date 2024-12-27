@@ -1,74 +1,56 @@
-# Variables générales pour les partages réseau
-$baseDepartements = "\\SRV_FICHIER\Departements"
-
-# Récupérer l'utilisateur connecté
-$user = $env:USERNAME
-
-# Ajouter un log pour vérifier chaque étape
+# Fichier de log
 $logFile = "C:\Logs\ScriptLog.txt"
+
+# Créer un dossier pour les logs s'il n'existe pas
 if (!(Test-Path -Path "C:\Logs")) {
     New-Item -ItemType Directory -Path "C:\Logs"
 }
-Add-Content -Path $logFile -Value "Début du script pour $user à $(Get-Date)"
 
-# Charger le module Active Directory
+# Log de début
+Add-Content -Path $logFile -Value "Début du script à $(Get-Date)"
+
+# Variables
+$baseDepartements = "\\ServeurDeFichiers\Departements"
+$user = $env:USERNAME
+Add-Content -Path $logFile -Value "Utilisateur connecté : $user"
+
+# Charger le module AD
 try {
     Import-Module ActiveDirectory -ErrorAction Stop
-    Add-Content -Path $logFile -Value "Module ActiveDirectory chargé avec succès."
+    Add-Content -Path $logFile -Value "Module Active Directory chargé avec succès."
 } catch {
-    Add-Content -Path $logFile -Value "Erreur : Impossible de charger le module ActiveDirectory. $_"
+    Add-Content -Path $logFile -Value "Erreur lors du chargement du module AD : $_"
     exit
 }
 
-# Récupérer l'OU complet de l'utilisateur
+# Récupérer l'OU
 try {
     $userOU = (Get-ADUser -Identity $user -Properties DistinguishedName).DistinguishedName
-    Add-Content -Path $logFile -Value "Utilisateur connecté : $user, OU : $userOU"
+    Add-Content -Path $logFile -Value "OU de l'utilisateur : $userOU"
 } catch {
-    Add-Content -Path $logFile -Value "Erreur : Impossible de récupérer l'OU pour l'utilisateur $user. $_"
+    Add-Content -Path $logFile -Value "Erreur lors de la récupération de l'OU : $_"
     exit
 }
 
-# Extraire le département (OU parent direct)
+# Extraire le département
 try {
     $ouParts = $userOU -split ","
     $departement = ($ouParts | Where-Object { $_ -like "OU=*" })[1] -replace "^OU=", ""
     Add-Content -Path $logFile -Value "Département identifié : $departement"
 } catch {
-    Add-Content -Path $logFile -Value "Erreur : Impossible d'extraire le département pour $user."
+    Add-Content -Path $logFile -Value "Erreur lors de l'extraction du département."
     exit
 }
 
-# Fonction pour mapper un lecteur réseau
-function Map_Drive {
-    param (
-        [string]$DriveLetter,
-        [string]$Path
-    )
-    # Vérifie si le lecteur est déjà mappé
-    if (!(Get-PSDrive -Name $DriveLetter -ErrorAction SilentlyContinue)) {
-        try {
-            New-PSDrive -Name $DriveLetter -PSProvider FileSystem -Root $Path -Persist
-            Add-Content -Path $logFile -Value "Lecteur $DriveLetter mappé vers $Path"
-        } catch {
-            Add-Content -Path $logFile -Value "Erreur : Impossible de mapper le lecteur $DriveLetter vers $Path. $_"
-        }
+# Mappage du lecteur
+try {
+    $departementPath = Join-Path $baseDepartements $departement
+    if (Test-Path $departementPath) {
+        New-PSDrive -Name "D" -PSProvider FileSystem -Root $departementPath -Persist
+        Add-Content -Path $logFile -Value "Lecteur D: mappé vers $departementPath"
     } else {
-        Add-Content -Path $logFile -Value "Lecteur $DriveLetter déjà mappé."
+        Add-Content -Path $logFile -Value "Erreur : Chemin département introuvable : $departementPath"
     }
+} catch {
+    Add-Content -Path $logFile -Value "Erreur lors du mappage du lecteur : $_"
 }
-
-# Mapper le lecteur départemental
-if ($departement) {
-    try {
-        $departementPath = Join-Path $baseDepartements $departement
-        Map-Drive -DriveLetter "D" -Path $departementPath
-    } catch {
-        Add-Content -Path $logFile -Value "Erreur lors du mappage pour le département : $departement"
-    }
-} else {
-    Add-Content -Path $logFile -Value "Aucun département trouvé pour l'utilisateur : $user"
-}
-
-# Fin du script
-Add-Content -Path $logFile -Value "Fin du script à $(Get-Date)"
