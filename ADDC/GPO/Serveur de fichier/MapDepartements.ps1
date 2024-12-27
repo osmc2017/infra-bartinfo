@@ -1,5 +1,5 @@
 # Variables générales pour les partages réseau
-$baseDepartements = "\\ServeurDeFichiers\Departements"
+$baseDepartements = "\\SRV_FICHIER\Departements"
 
 # Récupérer l'utilisateur connecté
 $user = $env:USERNAME
