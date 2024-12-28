@@ -20,21 +20,27 @@ try {
 
         # Extraire les informations sur le service et le département
         $DNParts = $UserDN -split ","
-        $Service = $DNParts[0] -replace "^OU=", ""  # Service
+        if ($DNParts.Length -lt 2) {
+            Add-Content -Path $LogFile -Value "Erreur : Impossible d'extraire les parties du DN. DNParts : $DNParts"
+            exit 1
+        }
+
+        $Service = $DNParts[0] -replace "^CN=", ""  # Service
         $Departement = $DNParts[1] -replace "^OU=", ""  # Département
 
         # Construire le chemin réseau
         $NetworkPath = "$Server\$BasePath\$Departement\$Service"
 
         # Mapper le lecteur réseau
-        net use J: $NetworkPath /persistent:no
+        net use Z: $NetworkPath /persistent:no
         Add-Content -Path $LogFile -Value "Lecteur mappé : $NetworkPath"
     } else {
         Add-Content -Path $LogFile -Value "Utilisateur en dehors de l'OU des départements."
         exit 1
     }
 } catch {
-    Add-Content -Path $LogFile -Value "Erreur : $_"
+    # Enregistrer tous les détails de l'erreur
+    Add-Content -Path $LogFile -Value "Erreur capturée : $_"
     exit 1
 }
 
