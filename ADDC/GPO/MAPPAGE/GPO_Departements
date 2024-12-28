@@ -66,7 +66,7 @@ Ce guide explique comment configurer une **GPO unique** pour mapper automatiquem
        \\SRV_FICHIER\Partage\Departements\RH
        ```
      - Remplacez `RH` par le nom du département correspondant.
-   - **Lettre de lecteur** : D: (ou une autre lettre libre).
+   - **Lettre de lecteur** : K: (ou une autre lettre libre).
    - **Reconnecter** : Oui.
 
 #### **C. Ajouter un Filtrage Dynamique**
