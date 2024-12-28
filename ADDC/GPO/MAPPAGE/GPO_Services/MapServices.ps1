@@ -41,7 +41,7 @@ try {
         }
 
         # Mapper le lecteur réseau
-        $NetUseResult = net use Z: $NetworkPath /persistent:no 2>&1
+        $NetUseResult = net use J: $NetworkPath /persistent:no 2>&1
         Add-Content -Path $LogFile -Value "Résultat de net use : $NetUseResult"
 
         # Vérifier si le lecteur a été mappé
