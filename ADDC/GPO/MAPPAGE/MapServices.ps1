@@ -33,10 +33,25 @@ try {
 
         # Construire le chemin réseau
         $NetworkPath = "$Server\$BasePath\$Departement\$Service"
+        Add-Content -Path $LogFile -Value "Chemin réseau construit : $NetworkPath"
+
+        # Vérifier si le chemin réseau est accessible
+        if (!(Test-Path -Path $NetworkPath)) {
+            Add-Content -Path $LogFile -Value "Erreur : Le chemin réseau n'est pas accessible : $NetworkPath"
+            exit 1
+        }
 
         # Mapper le lecteur réseau
-        net use Z: $NetworkPath /persistent:no
-        Add-Content -Path $LogFile -Value "Lecteur mappé : $NetworkPath"
+        $NetUseResult = net use Z: $NetworkPath /persistent:no 2>&1
+        Add-Content -Path $LogFile -Value "Résultat de net use : $NetUseResult"
+
+        # Vérifier si le lecteur a été mappé
+        if ($LASTEXITCODE -ne 0) {
+            Add-Content -Path $LogFile -Value "Erreur : Échec du mappage du lecteur avec code de sortie $LASTEXITCODE"
+            exit 1
+        }
+
+        Add-Content -Path $LogFile -Value "Lecteur mappé avec succès : Z: -> $NetworkPath"
     } else {
         Add-Content -Path $LogFile -Value "Utilisateur en dehors de l'OU des départements."
         exit 1
