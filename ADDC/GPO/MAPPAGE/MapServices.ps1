@@ -11,8 +11,8 @@ $RootOU = "OU=Departements,DC=bartinfo,DC=com"
 
 try {
     # Récupérer le DN complet de l'utilisateur
-    $UserDN = whoami /fqdn | ForEach-Object { ($_ -split ": ")[1] }
-    Add-Content -Path $LogFile -Value "DN de l'utilisateur récupéré : $UserDN"
+    $UserDN = whoami /fqdn
+    Add-Content -Path $LogFile -Value "Sortie brute de whoami /fqdn : $UserDN"
 
     # Vérifier si l'utilisateur est dans l'OU des départements
     if ($UserDN -like "*$RootOU*") {
@@ -20,8 +20,10 @@ try {
 
         # Extraire les informations sur le service et le département
         $DNParts = $UserDN -split ","
+        Add-Content -Path $LogFile -Value "DNParts : $DNParts"
+
         if ($DNParts.Length -lt 2) {
-            Add-Content -Path $LogFile -Value "Erreur : Impossible d'extraire les parties du DN. DNParts : $DNParts"
+            Add-Content -Path $LogFile -Value "Erreur : Impossible d'extraire les parties du DN."
             exit 1
         }
 
