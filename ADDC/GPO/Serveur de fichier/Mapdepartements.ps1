@@ -1,38 +1,38 @@
-# Log file location
-$LogFile = "C:\MapDriveLog_User.txt"
+# Définir le fichier de log
+$LogFile = "C:\MapDriveLog_Department.txt"
 Add-Content -Path $LogFile -Value "Début du script de mapping des lecteurs réseau - $(Get-Date)"
 
 # Variables
 $Server = "\\SRV_FICHIER"
 $BasePath = "Partage\Departements"
 
-# Obtenir le nom de l'utilisateur connecté
+# Obtenir l'utilisateur connecté et son domaine
 try {
     $User = $env:USERNAME
-    Add-Content -Path $LogFile -Value "Utilisateur connecté : $User"
+    $Domain = $env:USERDOMAIN
+    Add-Content -Path $LogFile -Value "Utilisateur connecté : $Domain\$User"
 } catch {
-    Add-Content -Path $LogFile -Value "Erreur lors de la récupération de l'utilisateur connecté : $_"
+    Add-Content -Path $LogFile -Value "Erreur lors de la récupération des informations utilisateur : $_"
     exit 1
 }
 
-# Déduire le département de l'utilisateur (personnalisez cette logique si nécessaire)
+# Logique pour extraire le département de l'utilisateur
+# Remplacez cette logique par celle qui convient à votre structure
 try {
-    Import-Module ActiveDirectory
-    $UserOU = (Get-ADUser -Identity $User).DistinguishedName -split ',OU='
-    $Department = $UserOU[1]  # Prend le département basé sur l'OU
+    $Department = $env:USERDNSDOMAIN -split "\." | Select-Object -First 1
     Add-Content -Path $LogFile -Value "Département détecté : $Department"
 } catch {
     Add-Content -Path $LogFile -Value "Erreur lors de la détection du département : $_"
     exit 1
 }
 
-# Construire le chemin réseau pour le département
+# Construire le chemin réseau
 $NetworkPath = "$Server\$BasePath\$Department"
 
 # Mapper le lecteur réseau
 try {
     Add-Content -Path $LogFile -Value "Tentative de mapping du lecteur réseau : $NetworkPath"
-    New-PSDrive -Name "Z" -PSProvider FileSystem -Root $NetworkPath -Persist
+    New-PSDrive -Name "K" -PSProvider FileSystem -Root $NetworkPath -Persist
     Add-Content -Path $LogFile -Value "Lecteur réseau mappé avec succès : $NetworkPath"
 } catch {
     Add-Content -Path $LogFile -Value "Erreur lors du mapping du lecteur réseau : $_"
