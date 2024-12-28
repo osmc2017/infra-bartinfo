@@ -11,15 +11,17 @@ $RootOU = "OU=Departements,DC=bartinfo,DC=com"
 
 try {
     # Récupérer le DN complet de l'utilisateur
-    $UserDN = whoami /fqdn | ForEach-Object { ($_ -split "=")[-1] }
-    Add-Content -Path $LogFile -Value "DN de l'utilisateur : $UserDN"
+    $UserDN = whoami /fqdn | ForEach-Object { ($_ -split ": ")[1] }
+    Add-Content -Path $LogFile -Value "DN de l'utilisateur récupéré : $UserDN"
 
     # Vérifier si l'utilisateur est dans l'OU des départements
     if ($UserDN -like "*$RootOU*") {
-        # Extraire les informations sur le département et le service
+        Add-Content -Path $LogFile -Value "Utilisateur trouvé dans l'OU des départements."
+
+        # Extraire les informations sur le service et le département
         $DNParts = $UserDN -split ","
-        $Service = $DNParts[0] -replace "^CN=", ""
-        $Departement = $DNParts[1] -replace "^OU=", ""
+        $Service = $DNParts[0] -replace "^OU=", ""  # Service
+        $Departement = $DNParts[1] -replace "^OU=", ""  # Département
 
         # Construire le chemin réseau
         $NetworkPath = "$Server\$BasePath\$Departement\$Service"
