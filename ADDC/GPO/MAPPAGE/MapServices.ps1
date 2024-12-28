@@ -18,7 +18,7 @@ try {
     if ($UserDN -like "*$RootOU*") {
         Add-Content -Path $LogFile -Value "Utilisateur trouvé dans l'OU des départements."
 
-        # Extraire les informations sur le service et le département
+        # Extraire les informations sur le service
         $DNParts = $UserDN -split ","
         Add-Content -Path $LogFile -Value "DNParts : $DNParts"
 
@@ -27,12 +27,11 @@ try {
             exit 1
         }
 
-        # Extraire le service et le département
-        $Service = $DNParts[1] -replace "^OU=", ""  # Service (deuxième partie du DN)
-        $Departement = $DNParts[2] -replace "^OU=", ""  # Département (troisième partie du DN)
+        # Extraire le service (première partie après l'utilisateur)
+        $Service = $DNParts[1] -replace "^OU=", ""  # Service
 
         # Construire le chemin réseau
-        $NetworkPath = "$Server\$BasePath\$Departement\$Service"
+        $NetworkPath = "$Server\$BasePath\$Service"
         Add-Content -Path $LogFile -Value "Chemin réseau construit : $NetworkPath"
 
         # Vérifier si le chemin réseau est accessible
