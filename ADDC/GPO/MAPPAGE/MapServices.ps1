@@ -10,22 +10,22 @@ $BasePath = "Partage\Services"
 $RootOU = "OU=Departements,DC=bartinfo,DC=com"
 
 try {
-    # Récupérer l'utilisateur actuel
-    $Username = $env:USERNAME
-    $UserDN = (Get-ADUser -Identity $Username -Properties DistinguishedName).DistinguishedName
+    # Récupérer le DN complet de l'utilisateur
+    $UserDN = whoami /fqdn | ForEach-Object { ($_ -split "=")[-1] }
+    Add-Content -Path $LogFile -Value "DN de l'utilisateur : $UserDN"
 
-    # Vérifier si l'utilisateur appartient à une sous-OU d'un département
+    # Vérifier si l'utilisateur est dans l'OU des départements
     if ($UserDN -like "*$RootOU*") {
         # Extraire les informations sur le département et le service
-        $OUs = $UserDN -split ","
-        $Service = $OUs[0] -replace "^OU=", ""
-        $Departement = $OUs[1] -replace "^OU=", ""
+        $DNParts = $UserDN -split ","
+        $Service = $DNParts[0] -replace "^CN=", ""
+        $Departement = $DNParts[1] -replace "^OU=", ""
 
         # Construire le chemin réseau
         $NetworkPath = "$Server\$BasePath\$Departement\$Service"
 
         # Mapper le lecteur réseau
-        net use Z: $NetworkPath /persistent:no
+        net use J: $NetworkPath /persistent:no
         Add-Content -Path $LogFile -Value "Lecteur mappé : $NetworkPath"
     } else {
         Add-Content -Path $LogFile -Value "Utilisateur en dehors de l'OU des départements."
