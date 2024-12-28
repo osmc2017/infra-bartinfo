@@ -22,13 +22,14 @@ try {
         $DNParts = $UserDN -split ","
         Add-Content -Path $LogFile -Value "DNParts : $DNParts"
 
-        if ($DNParts.Length -lt 2) {
-            Add-Content -Path $LogFile -Value "Erreur : Impossible d'extraire les parties du DN."
+        if ($DNParts.Length -lt 3) {
+            Add-Content -Path $LogFile -Value "Erreur : Structure inattendue du DN. DNParts : $DNParts"
             exit 1
         }
 
-        $Service = $DNParts[0] -replace "^CN=", ""  # Service
-        $Departement = $DNParts[1] -replace "^OU=", ""  # Département
+        # Extraire le service et le département
+        $Service = $DNParts[1] -replace "^OU=", ""  # Service (deuxième partie du DN)
+        $Departement = $DNParts[2] -replace "^OU=", ""  # Département (troisième partie du DN)
 
         # Construire le chemin réseau
         $NetworkPath = "$Server\$BasePath\$Departement\$Service"
