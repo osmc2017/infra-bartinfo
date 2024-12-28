@@ -6,22 +6,31 @@ Set-Content -Path $LogFile -Value "=== Début du script : $(Get-Date) ==="
 $Server = "\\SRV_FICHIER"
 $BasePath = "Partage\Services"
 
-try {
-    # Obtenir les groupes de l'utilisateur
-    $UserGroups = (whoami /groups | Where-Object { $_ -match "G_Service" }) -join ", "
+# OU principal des départements
+$RootOU = "OU=Departements,DC=bartinfo,DC=com"
 
-    if (-not $UserGroups) {
-        Add-Content -Path $LogFile -Value "Aucun groupe service détecté."
+try {
+    # Récupérer l'utilisateur actuel
+    $Username = $env:USERNAME
+    $UserDN = (Get-ADUser -Identity $Username -Properties DistinguishedName).DistinguishedName
+
+    # Vérifier si l'utilisateur appartient à une sous-OU d'un département
+    if ($UserDN -like "*$RootOU*") {
+        # Extraire les informations sur le département et le service
+        $OUs = $UserDN -split ","
+        $Service = $OUs[0] -replace "^OU=", ""
+        $Departement = $OUs[1] -replace "^OU=", ""
+
+        # Construire le chemin réseau
+        $NetworkPath = "$Server\$BasePath\$Departement\$Service"
+
+        # Mapper le lecteur réseau
+        net use Z: $NetworkPath /persistent:no
+        Add-Content -Path $LogFile -Value "Lecteur mappé : $NetworkPath"
+    } else {
+        Add-Content -Path $LogFile -Value "Utilisateur en dehors de l'OU des départements."
         exit 1
     }
-
-    # Mapper un lecteur pour chaque groupe service
-    foreach ($Group in $UserGroups -split ", ") {
-        $ServicePath = "$Server\$BasePath\$Group"
-        net use J: $ServicePath /persistent:no
-        Add-Content -Path $LogFile -Value "Lecteur mappé : $ServicePath"
-    }
-
 } catch {
     Add-Content -Path $LogFile -Value "Erreur : $_"
     exit 1
