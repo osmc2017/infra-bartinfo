@@ -145,6 +145,8 @@ Toutes les OUs créées ont leur protection contre la suppression accidentelle d
    - Ouvrez la console Active Directory Users and Computers (`dsa.msc`).
    - Naviguez jusqu'à **OU=Departements** pour voir les OUs créées.
 
+![Capture d'écran 2024-12-30 110527](https://github.com/user-attachments/assets/14aef5f2-8d3f-44e8-8b51-fe2f9ab46fb5)
+
 ---
 
 ## Messages affichés
