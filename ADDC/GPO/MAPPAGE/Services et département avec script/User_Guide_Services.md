@@ -49,6 +49,8 @@ Exemples :
 
 ### **2. Déployer via une GPO avec Tâche Planifiée**
 
+![Capture d'écran 2024-12-30 105438](https://github.com/user-attachments/assets/06ccb6ef-a5bf-4a4d-bbb3-f864d572f2c6)
+
 1. **Ouvrir la Console GPMC** :
    - Tapez `gpmc.msc` dans une invite de commande.
 
@@ -70,8 +72,12 @@ Exemples :
      - Sécurité : **Run whether user is logged on or not**.
      - Cochez : **Do not store password**.
 
+![Capture d'écran 2024-12-30 105547](https://github.com/user-attachments/assets/35bd3e73-8c22-4582-a42c-50610fd9571e)
+
    - **Triggers** :
      - Créez un nouveau déclencheur : **At log on**.
+
+![Capture d'écran 2024-12-30 105553](https://github.com/user-attachments/assets/b43b8563-b7ff-4442-a445-81a82eab132b)
 
    - **Actions** :
      - **Program/script** : `powershell.exe`
@@ -79,6 +85,8 @@ Exemples :
        ```plaintext
        -ExecutionPolicy Bypass -File \SRV_FICHIER\Scripts\MapServices.ps1
        ```
+
+![Capture d'écran 2024-12-30 105601](https://github.com/user-attachments/assets/8c3e65d2-ec83-4709-b7b3-ab6c43deb130)
 
    - **Conditions** :
      - Décochez toutes les options liées à l’alimentation.
@@ -108,8 +116,12 @@ Exemples :
      C:\Users\<NomUtilisateur>\MapDriveLog_Services.txt
      ```
 
+![Capture d'écran 2024-12-30 105833](https://github.com/user-attachments/assets/8693a8b8-ae59-41ad-890a-412676445911)
+
 3. **Testez le Mappage** :
    - Vérifiez dans l’Explorateur de fichiers si le lecteur réseau `Z:` est correctement mappé.
+
+![Capture d'écran 2024-12-30 105224](https://github.com/user-attachments/assets/d199b8c5-a077-469e-93d2-5528b4dccbff)
 
 ---
 
