@@ -122,6 +122,8 @@ L'identifiant SamAccountName existe déjà dans l'AD.
 - Consultez les messages affichés pour confirmer que les utilisateurs ont été créés correctement.
 - Utilisez la console Active Directory Users and Computers (`dsa.msc`) pour vérifier les utilisateurs et leur emplacement.
 
+![Capture d'écran 2024-12-30 110627](https://github.com/user-attachments/assets/7e8b147d-dca4-4064-bd34-5d336ffd737e)
+
 ---
 
 ## Dépannage
