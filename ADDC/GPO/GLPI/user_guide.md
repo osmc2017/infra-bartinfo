@@ -64,7 +64,7 @@ Pour vérifier : Cliquez sur l'icône du robot dans GLPI. Si "Aucun élément tr
 - **Chemin** : SOFTWARE\GLPI-Agent
 - **Nom** : server
 - **Type** : REG_SZ
-- **Données** : URL du serveur GLPI (ex. : `https://support.bartinfo.com/front/inventory.php`)
+- **Données** : URL du serveur GLPI (ex. : `http://support.bartinfo.com/front/inventory.php`)
 
 #### Valeur 2 : "tag"
 - **Action** : Mettre à jour
