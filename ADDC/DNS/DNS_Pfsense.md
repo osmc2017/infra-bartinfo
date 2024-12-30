@@ -15,12 +15,16 @@ Ce tutoriel explique comment configurer pfSense pour accéder à son interface w
      - **Type** : A
      - **Adresse IP** : Adresse IP locale de pfSense (par exemple, `192.168.1.1`).
 
+![Capture d'écran 2024-12-30 103627](https://github.com/user-attachments/assets/5251a397-73a3-40db-9185-82e6b57328a1)
+
 2. **Testez la résolution DNS** :
    - Sur un poste client, ouvrez un terminal (CMD) et exécutez :
      ```cmd
      nslookup pfsense.bartinfo.com
      ```
    - Vérifiez que l'adresse IP renvoyée correspond à celle de pfSense.
+
+![Capture d'écran 2024-12-30 103733](https://github.com/user-attachments/assets/7d503031-b589-47c4-a50d-369b271c05a7)
 
 ---
 
@@ -48,6 +52,8 @@ Ce tutoriel explique comment configurer pfSense pour accéder à son interface w
      ```
      http://pfsense.bartinfo.com
      ```
+     
+![Capture d'écran 2024-12-30 103827](https://github.com/user-attachments/assets/58afdba5-c0c1-4c81-8ee1-6d80ced45df8)
 
 ---
 
