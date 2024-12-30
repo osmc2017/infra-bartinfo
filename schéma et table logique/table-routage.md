@@ -23,6 +23,9 @@
 | 80  | VLAN Services annexes 1   | 256          | 192.168.6.0    | /24         | 255.255.255.0     | 192.168.6.1     | 192.168.6.254    | 192.168.6.255     | 192.168.6.1       |
 | 90  | VLAN de secours 1         | 256          | 192.168.8.0    | /24         | 255.255.255.0     | 192.168.8.1     | 192.168.8.254    | 192.168.8.255     |                   |
 
+## Schéma Logique
+
+![Capture d'écran 2024-12-30 111933](https://github.com/user-attachments/assets/b9d8aef5-0763-461f-b2c0-01a15ec39ee4)
 
 ## Adresse Ip et accés des Serveurs
 
