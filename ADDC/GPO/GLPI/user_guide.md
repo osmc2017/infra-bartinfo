@@ -25,6 +25,8 @@ Dans ce tutoriel, nous allons déployer l'agent GLPI sur Windows avec une GPO.
 3. Cochez : **Activer l’inventaire**.
 4. Cliquez sur **Sauvegarder**.
 
+![Capture d'écran 2024-12-30 104137](https://github.com/user-attachments/assets/a3acebce-dda8-4752-92ed-8bb597087beb)
+
 Pour vérifier : Cliquez sur l'icône du robot dans GLPI. Si "Aucun élément trouvé" s'affiche, aucun agent n'est encore configuré.
 
 ## 4. Créer une GPO pour déployer l'agent GLPI
@@ -52,6 +54,8 @@ Pour vérifier : Cliquez sur l'icône du robot dans GLPI. Si "Aucun élément tr
    ```
 7. Choisissez "Attribué" comme type de déploiement et validez.
 
+![Capture d'écran 2024-12-30 104232](https://github.com/user-attachments/assets/29082c17-1d99-413a-9523-cee5c8315b5f)
+
 ### C. Configurer l'agent GLPI avec le Registre Windows
 
 1. Dans la même GPO, accédez à :
@@ -66,6 +70,8 @@ Pour vérifier : Cliquez sur l'icône du robot dans GLPI. Si "Aucun élément tr
 - **Type** : REG_SZ
 - **Données** : URL du serveur GLPI (ex. : `http://support.bartinfo.com/front/inventory.php`)
 
+![Capture d'écran 2024-12-30 104300](https://github.com/user-attachments/assets/d2500314-2028-4f76-a452-1780473b06d3)
+
 #### Valeur 2 : "tag"
 - **Action** : Mettre à jour
 - **Ruche** : HKEY_LOCAL_MACHINE
@@ -73,6 +79,10 @@ Pour vérifier : Cliquez sur l'icône du robot dans GLPI. Si "Aucun élément tr
 - **Nom** : tag
 - **Type** : REG_SZ
 - **Données** : Nom de votre tag (ex. : "Parc Informatique")
+
+![Capture d'écran 2024-12-30 104308](https://github.com/user-attachments/assets/e8bfe20e-9ac7-4548-80c8-5fcc4b1b0062)
+
+![Capture d'écran 2024-12-30 104253](https://github.com/user-attachments/assets/1f61e3a5-bd4d-40be-91cb-301750f3518a)
 
 3. Enregistrez la configuration.
 
@@ -89,6 +99,10 @@ Pour vérifier : Cliquez sur l'icône du robot dans GLPI. Si "Aucun élément tr
    ```
 4. Cliquez sur "Force an inventory" pour forcer un inventaire.
 5. Vérifiez que la machine apparaît dans GLPI : **Parc > Ordinateurs**.
+
+![Capture d'écran 2024-12-30 104346](https://github.com/user-attachments/assets/65d068ea-095c-4a70-9c48-32ce2dfc018f)
+
+![Capture d'écran 2024-12-30 104410](https://github.com/user-attachments/assets/d64ed68f-2230-4db8-8eda-69cccb8c9598)
 
 ## 5. Conclusion
 
