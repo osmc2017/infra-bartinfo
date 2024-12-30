@@ -44,12 +44,14 @@ Ce guide explique comment configurer des **GPO (Group Policy Objects)** pour map
    - **Action** : Créer.
    - **Emplacement** : `\\ServeurDeFichiers\Utilisateurs\%USERNAME%`
      - La variable `%USERNAME%` utilise le nom d'utilisateur pour mapper automatiquement le dossier correspondant.
-   - **Lettre du lecteur** : Par exemple `U:` (pour utilisateur).
+   - **Lettre du lecteur** : Par exemple `I:` (pour utilisateur).
    - **Reconnecter** : Oui.
    - **Masquer ce lecteur** : Non.
    - **Rendre ce lecteur uniquement visible** : Non.
 3. **Appliquez la GPO aux utilisateurs concernés :**
    - Liez cette GPO à une OU contenant les utilisateurs qui doivent recevoir ce mappage.
+     
+![Capture d'écran 2024-12-30 104807](https://github.com/user-attachments/assets/c67b885d-94b1-4ac2-8ed5-11eca1fbe78b)
 
 ---
 
