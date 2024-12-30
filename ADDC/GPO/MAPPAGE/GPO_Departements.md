@@ -68,6 +68,10 @@ Ce guide explique comment configurer une **GPO unique** pour mapper automatiquem
      - Remplacez `RH` par le nom du département correspondant.
    - **Lettre de lecteur** : K: (ou une autre lettre libre).
    - **Reconnecter** : Oui.
+   - 
+![Capture d'écran 2024-12-30 104953](https://github.com/user-attachments/assets/46643e8f-5393-4fdb-b4f6-916bd3667901)
+
+![Capture d'écran 2024-12-30 105006](https://github.com/user-attachments/assets/2838db5d-6d62-4399-817e-8e4f4b54e2e4)
 
 #### **C. Ajouter un Filtrage Dynamique**
 1. Cliquez sur l'onglet **Common** (Commun) en haut de la fenêtre de configuration du lecteur.
@@ -79,6 +83,10 @@ Ce guide explique comment configurer une **GPO unique** pour mapper automatiquem
      - Exemple :
        - Pour `\\SRV_FICHIER\Partage\Departements\RH`, entrez `G_RH`.
        - Pour `\\SRV_FICHIER\Partage\Departements\IT`, entrez `G_IT`.
+       - 
+![Capture d'écran 2024-12-30 105014](https://github.com/user-attachments/assets/9a682489-444d-4109-b6c7-17d72eb777b9)
+
+![Capture d'écran 2024-12-30 105022](https://github.com/user-attachments/assets/957b8d6e-cd48-4cd9-b245-e9bcee9fbba7)
 
 ---
 
@@ -99,12 +107,14 @@ Ce guide explique comment configurer une **GPO unique** pour mapper automatiquem
 
 2. Connectez-vous avec un utilisateur appartenant à un groupe de sécurité (par exemple, `G_RH`).
 3. Vérifiez que :
-   - Le lecteur réseau `D:` est mappé à :
+   - Le lecteur réseau `K:` est mappé à :
      ```
      \\SRV_FICHIER\Partage\Departements\RH
      ```
 
 4. Testez avec un utilisateur appartenant à un autre groupe de sécurité pour valider le mappage correct.
+5. 
+![Capture d'écran 2024-12-30 105224](https://github.com/user-attachments/assets/e940dfc9-5ca2-4187-879b-c0e01457ea7e)
 
 ---
 
