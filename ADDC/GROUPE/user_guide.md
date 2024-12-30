@@ -123,6 +123,8 @@ foreach ($ou in $ous) {
     - Pour une OU nommée "Marketing", un groupe `G_Marketing` sera créé.
     - Pour une OU nommée "IT", un groupe `G_IT` sera créé.
 
+![Capture d'écran 2024-12-30 110239](https://github.com/user-attachments/assets/fcaf8c51-e3e2-4ead-80ce-e320509bcd58)
+
 - **Utilisateurs ajoutés :**
   - Les utilisateurs présents dans chaque OU sont automatiquement ajoutés au groupe correspondant.
 
