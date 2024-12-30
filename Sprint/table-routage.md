@@ -24,10 +24,9 @@
 | 90  | VLAN de secours 1         | 256          | 192.168.8.0    | /24         | 255.255.255.0     | 192.168.8.1     | 192.168.8.254    | 192.168.8.255     |                   |
 
 
-## Adresse Ip de nos Serveurs
+## Adresse Ip et accés des Serveurs
 
-- **Serveur pfsense**: 192.168.255.254 ???
-- **Serveur AD**: 192.168.0.36/27
-- **Serveur GLPI**: 192.168.0.35/27
-- **Serveur Core**(redondance): 192.168.0.36/27
-- **Serveur fichier**: 192.168.0.34/27
+- **Serveur AD**: 192.168.0.2/30
+- **Serveur pfsense**: 192.168.0.33 - http://pfsense.bartinfo.com
+- **Serveur GLPI**: 192.168.0.35/27 - http://pfsense.bartinfo.com
+- **Serveur fichier**: 192.168.0.36/27

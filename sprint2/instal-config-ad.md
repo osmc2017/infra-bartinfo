@@ -1,1 +1,0 @@
-les etape d'installation du service AD et du DC bartinfo.com
