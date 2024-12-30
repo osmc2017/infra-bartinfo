@@ -22,12 +22,16 @@ Ce tutoriel vous guide pour configurer l’accès à votre instance GLPI à l’
      - **Type** : A
      - **Adresse IP** : Adresse IP du serveur GLPI.
 
+![Capture d'écran 2024-12-30 103233](https://github.com/user-attachments/assets/60e49861-7faf-40f7-a631-0b832ba5323e)
+
 2. **Tester la résolution DNS** :
    - Sur un client du domaine, exécutez :
      ```cmd
      nslookup glpi.bartinfo.com
      ```
    - Assurez-vous que l’adresse IP renvoyée est correcte.
+
+![Capture d'écran 2024-12-30 103401](https://github.com/user-attachments/assets/9dcdc430-b210-4c91-b213-1aac972e583d)
 
 ---
 
@@ -73,6 +77,8 @@ Ce tutoriel vous guide pour configurer l’accès à votre instance GLPI à l’
    - Saisissez l’URL : `http://glpi.bartinfo.com`.
 
 2. **Vérifiez que l’interface de GLPI s’affiche correctement.**
+
+![Capture d'écran 2024-12-30 103527](https://github.com/user-attachments/assets/de58eb5d-725e-4662-9687-a9674b662a62)
 
 ---
 
