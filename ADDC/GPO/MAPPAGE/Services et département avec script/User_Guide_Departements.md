@@ -63,7 +63,7 @@ Exemples :
      ```plaintext
      Configuration utilisateur > Preferences > Control Panel Settings > Scheduled Tasks
      ```
-   - Faites un clic droit > **New > Immediate Task (At least Windows 7)**.
+   - Faites un clic droit > **New > Scheduled Task (At least Windows 7)**.
 
 4. **Paramètres de la Tâche** :
 
