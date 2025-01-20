@@ -98,7 +98,7 @@ Voici un script PowerShell complet pour déclarer les classes de fournisseurs et
 # Variables principales
 $DhcpServerName = "SERVER-DC"              # Serveur DHCP
 $PxeServerIp = "192.168.0.2"               # Adresse IP du serveur WDS (SERVER-WDS)
-$Scope = "192.168.14.0"                    # Plage DHCP
+$Scope = "192.168.2.0"                    # Adresse réseau de la plage de réseau
 
 # 1. Ajouter les classes de fournisseurs
 Add-DhcpServerv4Class -ComputerName $DhcpServerName -Name "PXEClient - UEFI x64" -Type Vendor -Data "PXEClient:Arch:00007" -Description "PXEClient:Arch:00007"
