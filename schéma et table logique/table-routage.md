@@ -33,3 +33,4 @@
 - **Serveur pfsense**: 192.168.0.33 - http://pfsense.bartinfo.com
 - **Serveur GLPI**: 192.168.0.35/27 - http://pfsense.bartinfo.com
 - **Serveur fichier**: 192.168.0.36/27
+- **Serveur WDS**: 192.168.0.37/27
