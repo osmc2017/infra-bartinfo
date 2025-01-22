@@ -142,4 +142,3 @@ Set-DhcpServerv4OptionValue -ComputerName $DhcpServerName -ScopeId $Scope -Optio
      - **Option 67** : Spécifie le fichier de boot approprié (différent pour UEFI et BIOS).
 
 Avec ce script, le serveur DHCP (SERVER-DC) et le serveur WDS (SERVER-WDS) sont configurés pour gérer les boots PXE en mode UEFI et BIOS.
-
