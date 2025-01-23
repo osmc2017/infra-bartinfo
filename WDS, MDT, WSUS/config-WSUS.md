@@ -60,7 +60,7 @@ Ce tutoriel vous guidera à travers l'installation et la configuration de base d
      - **Paramètres de connexion** : Laissez vide (sauf si vous utilisez un proxy) et cliquez sur Start Connecting.
      - **Choisir les langues** : Sélectionnez les langues nécessaires.
      - **Choisir les produits** : Cochez les produits à mettre à jour (ex. : Windows Server 2022, Windows 10).
-     - **Choisir les classifications** : Sélectionnez les types de mises à jour (ex. : Mises à jour critiques, Définitions de sécurité).
+     - **Choisir les classifications** : Sélectionnez les types de mises à jour (ex. : Mises à jour critiques, Définitions de sécurité). a changer
      - **Planifier la synchronisation** : Configurez la fréquence de synchronisation (ex. : quotidienne).
      - Lancez une première synchronisation.
 
