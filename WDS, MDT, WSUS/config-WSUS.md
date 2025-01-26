@@ -97,3 +97,4 @@ Ce tutoriel vous guidera à travers l'installation et la configuration de base d
 
 ## Conclusion
 Vous avez maintenant installé et configuré un serveur WSUS de base avec un disque de stockage dédié pour les fichiers WSUS. Vous pouvez gérer les mises à jour et surveiller leur distribution à vos clients depuis la console WSUS.
+
