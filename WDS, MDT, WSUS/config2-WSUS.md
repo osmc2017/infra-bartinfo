@@ -52,7 +52,7 @@ Par défaut, WSUS place les nouveaux ordinateurs dans le groupe "Ordinateurs non
 #### Paramètres à configurer :
 1. **Spécifier l’emplacement intranet du service de mise à jour Microsoft** :
    - Activez ce paramètre.
-   - Entrez l’URL de votre serveur WSUS, par exemple : `http://srv-wsus.it-connect.local:8530`.
+   - Entrez l’URL de votre serveur WSUS, par exemple : `http://dns-du-serveur:8530`.
 2. **Configuration du service Mises à jour automatique** :
    - Activez ce paramètre.
    - Choisissez l’option **4 - Téléchargement automatique et planification des installations**.
